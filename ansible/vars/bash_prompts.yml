@@ -5,7 +5,7 @@ bash_prompts:
     parts:
       - "{{ ansi_esc.format([ansi.style.bold, ansi.fg.bright_white] | join(';')) }}"
       - "{{ unicode.lower_corner }}{{ unicode.vertical_line }}"
-      - "{{ bash_esc.time_hm }}{{ unicode.vertical_line }}"
+      - "$(prompt_env){{ unicode.vertical_line }}"
       - "{{ ansi_esc.format(ansi.fg.bright_red) }}{{ bash_esc.user }}" # Bright red user
       - "{{ ansi_esc.format(ansi.fg.bright_white) }}@"
       - "{{ ansi_esc.format(ansi.fg.bright_green) }}{{ bash_esc.host }}" # Bright green host
@@ -19,7 +19,7 @@ bash_prompts:
     parts:
       - "{{ ansi_esc.format([ansi.style.bold, ansi.fg.bright_white] | join(';')) }}"
       - "{{ unicode.lower_corner }}{{ unicode.vertical_line }}"
-      - "{{ bash_esc.time_hm }}{{ unicode.vertical_line }}"
+      - "$(prompt_env){{ unicode.vertical_line }}"
       - "{{ ansi_esc.format(ansi.fg.bright_cyan) }}{{ bash_esc.user }}" # Bright cyan user
       - "{{ ansi_esc.format(ansi.fg.bright_white) }}@"
       - "{{ ansi_esc.format(ansi.fg.bright_magenta) }}{{ bash_esc.host }}" # Bright magenta host

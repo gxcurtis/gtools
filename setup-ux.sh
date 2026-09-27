@@ -13,7 +13,7 @@ else
   APB='./ansible/.venv/bin/ansible-playbook'
 fi
 
-"$APB" -c local -i "localhost," ansible/setup-ux.yml "$@"
+"$APB" -c local -i "localhost," ansible/setup-ux.yml "$@" && source "$HOME/.bashrc"
 
 
 

@@ -9,6 +9,18 @@ gitm() {
     git push
 }
 
+# Prompt
+prompt_env() {
+  local branch
+  if [[ -n "${VIRTUAL_ENV:-}" ]]; then
+    printf '(%s)' "${VIRTUAL_ENV:-}"
+  elif branch=$(git symbolic-ref --quiet --short HEAD 2>/dev/null); then
+    printf '%s' "$branch"
+  else
+    printf '%(%H:%M:%S)T' -1
+  fi
+}
+
 {% if add_situational_functions %}
 # Monitor Brightness
 set-brightness() {
