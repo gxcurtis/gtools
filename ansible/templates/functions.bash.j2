@@ -13,7 +13,7 @@ gitm() {
 prompt_env() {
   local branch
   if [[ -n "${VIRTUAL_ENV:-}" ]]; then
-    printf '(%s)' "${VIRTUAL_ENV:-}"
+    printf '(%s)' "$(basename "$VIRTUAL_ENV")"
   elif branch=$(git symbolic-ref --quiet --short HEAD 2>/dev/null); then
     printf '%s' "$branch"
   else
