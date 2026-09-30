@@ -9,6 +9,14 @@ gitm() {
     git push
 }
 
+# find + xargs
+findx() {
+  local target
+  target="$1"
+
+  find "$target" -mindepth 1 -maxdepth 1 -print0 | xargs -0 -r -I{} -P8 
+}
+
 # Prompt
 prompt_env() {
   local branch

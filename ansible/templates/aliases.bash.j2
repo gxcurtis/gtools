@@ -1,20 +1,9 @@
-#!/usr/bin/env bash
-
-# For alias to inherit tab completion
-inherit_completion() {
-  local src=$1
-  local dest=$2
-
-  local comp
-  comp=$(complete -p "$src") || return 1
-  eval "${comp% "$src"} $dest"
-}
-
 # Aliases
-{% for alias in aliases %}
-alias {{ alias.name }}='{{ alias.cmd }}'
-{% if alias.complete %}
-inherit_completion {{ alias.cmd }} {{ alias.name }}
-{% endif %}
+
+{% for group in alias_groups %}
+# {{ group.name }}
+{% for alias in group.aliases %}
+alias {{ alias.name }}='{{ alias.command }}'
+{% endfor %}
 
 {% endfor %}

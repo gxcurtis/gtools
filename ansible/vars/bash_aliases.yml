@@ -1,48 +1,43 @@
 ---
-aliases:
-  - name: ll
-    cmd: ls -l
-    complete: false
-  - name: la
-    cmd: ls -a
-    complete: false
-  - name: rc
-    cmd: echo $?
-    complete: false
-  - name: arsync
-    cmd: rsync -havuHP --stat
-    complete: false
-  - name: sl
-    cmd: systemctl
-    complete: false
-  - name: jl
-    cmd: journalctl
-    complete: false
-  - name: apb
-    cmd: ansible-playbook
-    complete: false
-  - name: adoc
-    cmd: ansible-doc
-    complete: false
-  - name: acfg
-    cmd: ansible-config
-    complete: false
-  - name: avlt
-    cmd: ansible-vault
-    complete: false
-  - name: agal
-    cmd: ansible-galaxy
-    complete: false
-  - name: alint
-    cmd: ansible-lint
-    complete: false
-  - name: python
-    cmd: python3
-    complete: false
-  - name: pypile
-    cmd: python3 -m py_compile
-    complete: false
-  - name: pyvenv
-    cmd: python3 -m venv
-    complete: false
-
+alias_groups:
+  - name: General
+    aliases:
+      - name: ll
+        command: ls -l
+      - name: la
+        command: ls -a
+      - name: rc
+        command: echo $?
+      - name: arsync
+        command: rsync -havuHP --stat
+      - name: sl
+        command: systemctl
+      - name: jl
+        command: journalctl
+      - name: ip4
+        command: ip -4 -br address
+      - name: src
+        command: source ${HOME%/}/.bashrc
+  - name: Ansible
+    aliases:
+      - name: apb
+        command: ansible-playbook
+      - name: adoc
+        command: ansible-doc
+      - name: acfg
+        command: ansible-config
+      - name: avlt
+        command: ansible-vault
+      - name: agal
+        command: ansible-galaxy
+      - name: alint
+        command: ansible-lint
+  - name: Python
+    aliases:
+      - name: python
+        command: python3
+      - name: pypile
+        command: python3 -m py_compile
+      - name: pyvenv
+        command: python3 -m venv
+      
