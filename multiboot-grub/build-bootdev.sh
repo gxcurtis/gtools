@@ -70,10 +70,10 @@ partition_device() {
   local device="$1"
 
   if mountpoint -q "$ESP_MOUNTPOINT"; then
-    umount "$ESP_MOUNTPOINT"
+    umount -f "$ESP_MOUNTPOINT"
   fi
   if mountpoint -q "$DATA_MOUNTPOINT"; then
-    umount "$DATA_MOUNTPOINT"
+    umount -f "$DATA_MOUNTPOINT"
   fi
 
   wipefs -a "$device"
@@ -105,7 +105,7 @@ stage_files_directories() {
   mount -L "$DATA_LABEL" "$DATA_MOUNTPOINT"
 
   mkdir -p "$EFI_BOOT_DIR"
-  mkdir -p "$GRUB_DIR" "$KS_DIR" "${DISTRO_DIRS[@]/#/$DATA_MOUNTPOINT/}"
+  mkdir -p "$GRUB_DIR/menus" "$KS_DIR" "${DISTRO_DIRS[@]/#/$DATA_MOUNTPOINT/}"
 
   if [[ -d "$DATA_MOUNTPOINT/lost+found" ]]; then
     rmdir "$DATA_MOUNTPOINT/lost+found"
@@ -161,7 +161,8 @@ EOF
     --modules="$grub_modules" \
     "boot/grub/grub.cfg=$embedded_cfg"
 
-  cp grub.cfg os-submenus.cfg "$GRUB_DIR"
+  cp grub.cfg "$GRUB_DIR"
+  cp -r menus "$GRUB_DIR/"
 }
 
 add_basic_ks() {
@@ -176,6 +177,7 @@ timezone UTC --utc
 
 network --bootproto=dhcp --device=link --activate
 firewall --enabled --service=ssh
+vnc --password=vnc123
 
 selinux --enforcing
 rootpw --lock
@@ -200,6 +202,7 @@ tmux
 
 %post
 systemctl enable sshd
+systemctl enable serial-getty@ttyS0.service
 %end
 EOF
 }
@@ -266,6 +269,7 @@ else
   setup_grub_bios
   setup_grub_efi
   add_basic_ks
+  echo
 
   printf "Boot device setup.\n"
   lsblk -o name,size,type,mountpoint,label "$DEV"
