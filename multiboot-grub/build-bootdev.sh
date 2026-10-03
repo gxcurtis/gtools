@@ -86,8 +86,16 @@ partition_device() {
     mkpart DATA ext4 515MiB 100% \
     print
 
-  mkfs.vfat -F32 -n "$ESP_LABEL" "${device}p2"
-  mkfs.ext4 -F -L "$DATA_LABEL" "${device}p3"
+  if [[ "$device" =~ [0-9]$ ]]; then
+    local part2="${device}p2"
+    local part3="${device}p3"
+  else
+    local part2="${device}2"
+    local part3="${device}3"
+  fi
+
+  mkfs.vfat -F32 -n "$ESP_LABEL" "$part2"
+  mkfs.ext4 -F -L "$DATA_LABEL" "$part3"
 }
 
 stage_files_directories() {
@@ -100,7 +108,7 @@ stage_files_directories() {
   mkdir -p "$GRUB_DIR" "$KS_DIR" "${DISTRO_DIRS[@]/#/$DATA_MOUNTPOINT/}"
 
   if [[ -d "$DATA_MOUNTPOINT/lost+found" ]]; then
-    rmdir "$DATA_MOUNPOINT/lost+found"
+    rmdir "$DATA_MOUNTPOINT/lost+found"
   fi
 
   cp -a /usr/lib/grub/x86_64-efi "$GRUB_DIR/"
