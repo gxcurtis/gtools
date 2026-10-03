@@ -99,6 +99,10 @@ stage_files_directories() {
   mkdir -p "$EFI_BOOT_DIR"
   mkdir -p "$GRUB_DIR" "$KS_DIR" "${DISTRO_DIRS[@]/#/$DATA_MOUNTPOINT/}"
 
+  if [[ -d "$DATA_MOUNTPOINT/lost+found" ]]; then
+    rmdir "$DATA_MOUNPOINT/lost+found"
+  fi
+
   cp -a /usr/lib/grub/x86_64-efi "$GRUB_DIR/"
   cp -a /usr/lib/grub/i386-pc "$GRUB_DIR/"
 }
@@ -149,17 +153,7 @@ EOF
     --modules="$grub_modules" \
     "boot/grub/grub.cfg=$embedded_cfg"
 
-  cat <<- EOF > "$GRUB_CONFIG"
-set default=0
-set timeout=60
-
-insmod all_video
-insmod gfxterm
-insmod linux
-
-# add menu here
-
-EOF
+  cp grub.cfg os-submenus.cfg "$GRUB_DIR"
 }
 
 add_basic_ks() {
@@ -213,12 +207,9 @@ cleanup() {
         umount "$ESP_MOUNTPOINT"
         umount "$DATA_MOUNTPOINT"
         
-        if [[ -d "$DATA_MOUNTPOINT/lost+found" ]]; then
-          rmdir "$DATA_MOUNTPOINT/lost+found"
-        fi
-        
         rmdir "$ESP_MOUNTPOINT"
         rmdir "$DATA_MOUNTPOINT"
+
         sleep 1
         echo "Cleanup complete."
         break
@@ -253,7 +244,7 @@ else
   echo "Script will wipe the following device:"
 
   echo
-  lsblk -o name,path,size,type,label -d "$DEV"
+  lsblk -o name,size,type,label -d "$DEV"
 
   echo
   read -r -p "If you still wish to continue enter ERASE in all caps: " answer
@@ -271,7 +262,7 @@ else
   add_basic_ks
 
   printf "Boot device setup.\n"
-  lsblk -o name,size,type,mountpoints,label "$DEV"
+  lsblk -o name,size,type,mountpoint,label "$DEV"
   echo
   cleanup
   printf "BYE!\n" && sleep 1
