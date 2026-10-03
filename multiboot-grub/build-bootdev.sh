@@ -207,7 +207,6 @@ EOF
 cleanup() {
   while true; do
     read -r -p "Would you like to cleanup and unmount partitions? (y/n): " answer
-    echo
     case "$answer" in
       [Yy])
         echo "Flushing memory to disk before unmounting..."
@@ -223,7 +222,6 @@ cleanup() {
         break
         ;;
       [Nn])
-        sleep 1
         echo "Skipping cleanup."
         break
         ;;
