@@ -188,6 +188,12 @@ user --name=admin --groups=wheel \
 zerombr
 clearpart --all --initlabel
 autopart --type=lvm
+%include /tmp/ignoredisk.ks
+
+%pre
+installdisk=$(lsblk -nbo PKNAME /dev/disk/by-label/INSTALL)
+echo "ignoredisk --drives=$installdisk" > /tmp/ignoredisk.ks
+%end
 
 %packages
 @core
@@ -271,11 +277,11 @@ else
   add_basic_ks
   echo
 
-  printf "Boot device setup.\n"
+  printf "Boot device setup.\n\n"
   lsblk -o name,size,type,mountpoint,label "$DEV"
   echo
   cleanup
-  printf "BYE!\n" && sleep 1
+  sleep 1 && printf "BYE!\n" && sleep 1
 fi
 
 
