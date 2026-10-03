@@ -177,21 +177,22 @@ timezone UTC --utc
 
 network --bootproto=dhcp --device=link --activate
 firewall --enabled --service=ssh
-vnc --password=vnc123
 
 selinux --enforcing
 rootpw --lock
-user --name=admin --groups=wheel \
-  --password='$6$I9ZuW36S/847tpiu$DkfKcRF6L.S996Zwzh8wbggNNfdDA4OEMg3uCYLC72JgSts/vDD3EN2PtYiwLrrZr0v7IyYoxALvyTMma5bWC.' \
-  --iscrypted
+user --name=admin --groups=wheel --password='$6$I9ZuW36S/847tpiu$DkfKcRF6L.S996Zwzh8wbggNNfdDA4OEMg3uCYLC72JgSts/vDD3EN2PtYiwLrrZr0v7IyYoxALvyTMma5bWC.' --iscrypted
 
 zerombr
 clearpart --all --initlabel
 autopart --type=lvm
 %include /tmp/ignoredisk.ks
 
-%pre
-installdisk=$(lsblk -nbo PKNAME /dev/disk/by-label/INSTALL)
+%pre --erroronfail --log=/tmp/ks-pre.log
+installdisk=$(lsblk -no PKNAME /dev/disk/by-label/INSTALL)
+if [ -z "$installdisk" ]; then
+  echo "No disk found with INSTALL label"
+  exit 1
+fi
 echo "ignoredisk --drives=$installdisk" > /tmp/ignoredisk.ks
 %end
 
