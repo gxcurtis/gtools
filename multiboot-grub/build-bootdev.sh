@@ -188,9 +188,9 @@ autopart --type=lvm
 %include /tmp/ignoredisk.ks
 
 %pre --erroronfail --log=/tmp/ks-pre.log
-installdisk=$(lsblk -no PKNAME /dev/disk/by-label/INSTALL)
+installdisk=$(lsblk -ndo PKNAME /dev/disk/by-label/INSTALL)
 if [ -z "$installdisk" ]; then
-  echo "No disk found with INSTALL label"
+  echo "No INSTALL disk found!"
   exit 1
 fi
 echo "ignoredisk --drives=$installdisk" > /tmp/ignoredisk.ks
