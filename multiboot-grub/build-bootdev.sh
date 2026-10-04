@@ -112,6 +112,8 @@ stage_files_directories() {
   cp -a /usr/lib/grub/x86_64-efi "$GRUB_DIR/"
   cp -a /usr/lib/grub/i386-pc "$GRUB_DIR/"
   cp -a resources "$DATA_MOUNTPOINT/"
+
+  chmod -R a+rX "$DATA_MOUNTPOINT/"
 }
 
 setup_grub_bios() {
