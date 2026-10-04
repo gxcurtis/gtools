@@ -8,13 +8,11 @@ DEV="${1:-}"
 ESP_MOUNTPOINT="/mnt/ESP"
 DATA_MOUNTPOINT="/mnt/DATA"
 EFI_BOOT_DIR="$ESP_MOUNTPOINT/EFI/BOOT"
-KS_DIR="$DATA_MOUNTPOINT/kickstarts"
 GRUB_DIR="$DATA_MOUNTPOINT/boot/grub2"
-GRUB_CONFIG="$GRUB_DIR/grub.cfg"
+RESOURCE_DIR="$DATA_MOUNTPOINT/resources/"
 DISTRO_DIRS=(
   rhel/{7..10}
   rocky/{8..10}
-  alma/{8..10}
   centos/{8..10}
   fedora
 )
@@ -105,7 +103,7 @@ stage_files_directories() {
   mount -L "$DATA_LABEL" "$DATA_MOUNTPOINT"
 
   mkdir -p "$EFI_BOOT_DIR"
-  mkdir -p "$GRUB_DIR/menus" "$KS_DIR" "${DISTRO_DIRS[@]/#/$DATA_MOUNTPOINT/}"
+  mkdir -p "$GRUB_DIR" "${DISTRO_DIRS[@]/#/$DATA_MOUNTPOINT/}"
 
   if [[ -d "$DATA_MOUNTPOINT/lost+found" ]]; then
     rmdir "$DATA_MOUNTPOINT/lost+found"
@@ -113,6 +111,7 @@ stage_files_directories() {
 
   cp -a /usr/lib/grub/x86_64-efi "$GRUB_DIR/"
   cp -a /usr/lib/grub/i386-pc "$GRUB_DIR/"
+  cp -a resources "$DATA_MOUNTPOINT/"
 }
 
 setup_grub_bios() {
@@ -140,7 +139,7 @@ setup_grub_efi() {
   cat <<- EOF > "$embedded_cfg"
 search --no-floppy --label $DATA_LABEL --set=root
 set prefix=(\$root)/boot/grub2
-configfile ${GRUB_CONFIG#"$DATA_MOUNTPOINT"}
+configfile /boot/grub2/grub.cfg
 EOF
 
   local grub_modules="
@@ -162,56 +161,6 @@ EOF
     "boot/grub/grub.cfg=$embedded_cfg"
 
   cp grub.cfg "$GRUB_DIR"
-  cp -r menus "$GRUB_DIR/"
-}
-
-add_basic_ks() {
-  cat << 'EOF' > "$KS_DIR/basic.ks"
-text
-reboot
-firstboot --disable
-
-lang en_US.UTF-8
-keyboard us
-timezone UTC --utc
-
-network --bootproto=dhcp --device=link --activate
-firewall --enabled --service=ssh
-
-selinux --enforcing
-rootpw --lock
-user --name=admin --groups=wheel --password='$6$I9ZuW36S/847tpiu$DkfKcRF6L.S996Zwzh8wbggNNfdDA4OEMg3uCYLC72JgSts/vDD3EN2PtYiwLrrZr0v7IyYoxALvyTMma5bWC.' --iscrypted
-
-zerombr
-clearpart --all --initlabel
-autopart --type=lvm
-%include /tmp/ignoredisk.ks
-
-%pre --erroronfail --log=/tmp/ks-pre.log
-installdisk=$(lsblk -ndo PKNAME /dev/disk/by-label/INSTALL)
-if [ -z "$installdisk" ]; then
-  echo "No INSTALL disk found!"
-  exit 1
-fi
-echo "ignoredisk --drives=$installdisk" > /tmp/ignoredisk.ks
-%end
-
-%packages
-@core
-openssh-server
-vim-enhanced
-bind-utils
-nmap-ncat
-curl
-wget
-tmux
-%end
-
-%post
-systemctl enable sshd
-systemctl enable serial-getty@ttyS0.service
-%end
-EOF
 }
 
 cleanup() {
@@ -275,7 +224,6 @@ else
   stage_files_directories
   setup_grub_bios
   setup_grub_efi
-  add_basic_ks
   echo
 
   printf "Boot device setup.\n\n"
@@ -284,5 +232,4 @@ else
   cleanup
   sleep 1 && printf "BYE!\n" && sleep 1
 fi
-
 
