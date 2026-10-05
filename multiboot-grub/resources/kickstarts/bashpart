@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+#%pre --log=/tmp/pre.log
+
+pass() {
+    return
+}
+
+((G = 1024 ** 3))
+((T = G * 1024))
+# Min/Max disk size in bytes
+((MIN_SIZE = 40 * G))
+((MAX_SIZE = 2 * T))
+
+# Filter for qualified disks
+filtered_disks=()
+smallest_disk=''
+while read -r name size removable; do
+    if ((removable == 1)); then
+        pass
+
+    elif [[ ! "$name" =~ ^(vd|sd|nvme) ]]; then
+        pass
+
+    elif (( size < MIN_SIZE || size > MAX_SIZE )); then
+        pass
+
+    elif [[ -z "$smallest_disk" ]]; then
+        smallest_disk="$name"
+        filtered_disks+=("$smallest_disk")
+
+    elif (( smallest_disk < size )); then
+        pass
+
+    elif (( smallest_disk > size )); then
+        smallest_disk="$name"
+        filtered_disks=("$name")
+
+    elif [[ "${smallest_disk:0:2}" == "${name:0:2}" ]]; then 
+        filtered_disks+=("$name")
+
+    else
+        pass
+                
+    fi
+done < <(lsblk -ndbo NAME,SIZE,RM)
+
+echo "Smallest disk: $smallest_disk"
+echo "Filtered disk(s): ${#filtered_disks[@]}"
