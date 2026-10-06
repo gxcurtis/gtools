@@ -125,6 +125,7 @@ setup_grub_bios() {
 
 setup_grub_efi() {
   local embedded_cfg="$EFI_BOOT_DIR/embedded.cfg"
+  local grub_cfg="${1:-${RESOURCE_DIR}/grubmenus/grub.cfg}"
   
   if ! mountpoint -q "$ESP_MOUNTPOINT"; then
     echo
@@ -162,7 +163,7 @@ EOF
     --modules="$grub_modules" \
     "boot/grub/grub.cfg=$embedded_cfg"
 
-  cp grub.cfg "$GRUB_DIR"
+  cp "$grub_cfg" "$GRUB_DIR"
 }
 
 cleanup() {
