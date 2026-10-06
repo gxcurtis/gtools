@@ -125,7 +125,7 @@ setup_grub_bios() {
 
 setup_grub_efi() {
   local embedded_cfg="$EFI_BOOT_DIR/embedded.cfg"
-  local grub_cfg="${1:-${RESOURCE_DIR}/grubmenus/grub.cfg}"
+  local grub_cfg="$RESOURCE_DIR/grubmenus/grub.cfg"
   
   if ! mountpoint -q "$ESP_MOUNTPOINT"; then
     echo
