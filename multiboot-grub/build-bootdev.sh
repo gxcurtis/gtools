@@ -25,6 +25,7 @@ usage() {
 
 dependencies_installed() {
   PKG_DEPS=(
+    gdisk
     parted
     dosfstools
     grub2-pc
@@ -75,6 +76,8 @@ partition_device() {
   fi
 
   wipefs -a "$device"
+  sgdisk --zap-all "$device"
+  dd if=/dev/zero of="$device" bs=1M count=16 conv=fsync
   parted --script --align optimal "$device" \
     mklabel gpt \
     mkpart BIOS 1MiB 3MiB \
@@ -209,7 +212,7 @@ elif ! dependencies_installed; then
   exit 1
 else
   echo
-  echo "Script will wipe the following device:"
+  echo "ATTENTION: Script will WIPE the following device:"
 
   echo
   lsblk -o name,size,type,label -d "$DEV"
