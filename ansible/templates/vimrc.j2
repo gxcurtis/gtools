@@ -9,7 +9,13 @@ set number
 set numberwidth=1
 syntax on
 filetype plugin on
-colorscheme apprentice
+for scheme in ['apprenctice', 'slate', 'default']
+    try
+        execute 'colorscheme ' . scheme
+        break
+    catch /^Vim.*:E185/
+    endtry
+endfor
 
 " Navigation keybindings
 inoremap <C-j> <Esc>
