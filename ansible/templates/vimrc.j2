@@ -1,60 +1,50 @@
-" Core syntax
-colorscheme industry
+" Core Settings
 set encoding=utf-8
-set number
-set numberwidth=1
-set timeout
-set timeoutlen=500
-
-" Navigation keybindings
-inoremap jh <Esc>
-nnoremap j h
-nnoremap k j
-nnoremap l k
-nnoremap ; l
-
-vnoremap j h
-vnoremap k j
-vnoremap l k
-vnoremap ; l
-
-nnoremap <M-;> ;
-vnoremap <M-;> ;
-onoremap <M-;> ;
-
-nnoremap <Esc>k <C-f>
-nnoremap <Esc>l <C-b>
-
-vnoremap <Esc>k <C-f>
-vnoremap <Esc>l <C-b>
-
-nnoremap <C-w>j <C-w>h
-nnoremap <C-w>k <C-w>j
-nnoremap <C-w>l <C-w>k
-nnoremap <C-w>; <C-w>l
-
-" Defaults
 set tabstop=4
 set shiftwidth=4
 set softtabstop=4
 set expandtab
 set autoindent
+set number
+set numberwidth=1
+syntax on
+filetype plugin on
+colorscheme apprentice
 
-" Python
-augroup ft_python
-  autocmd!
-  autocmd FileType python setlocal expandtab tabstop=4 softtabstop=4 shiftwidth=4
-augroup END
+" Navigation keybindings
+inoremap <C-j> <Esc>
+nnoremap j h
+nnoremap k j
+nnoremap l k
+nnoremap ; l
+nnoremap h ;
 
-" C & C++
-augroup ft_c
-  autocmd!
-  autocmd FileType c,cpp setlocal expandtab tabstop=4 softtabstop=4 shiftwidth=4
-  autocmd FileType c,cpp setlocal cindent
-augroup END
+vnoremap j h
+vnoremap k j
+vnoremap l k
+vnoremap ; l
+vnoremap h ;
 
-" Bash, YAML, HTML, CSS 
+onoremap j h
+onoremap k j
+onoremap l k
+onoremap ; l
+onoremap h ;
+
+nnoremap <C-w>j <C-w>h
+nnoremap <C-w>k <C-w>j
+nnoremap <C-w>l <C-w>k
+nnoremap <C-w>; <C-w>l
+nnoremap <C-w>h <C-w>;
+
+" YAML, HTML, CSS 
 augroup ft_others
   autocmd!
-  autocmd FileType sh,bash,yaml,html,css setlocal expandtab tabstop=2 softtabstop=2 shiftwidth=2
+  autocmd FileType yaml,html,css setlocal expandtab tabstop=2 softtabstop=2 shiftwidth=2
 augroup END
+
+" User defined commands
+command! Shellcheck execute '!shellcheck ' . shellescape(expand('%:p'))
+command! Ruffcheck execute '!ruff check ' . shellescape(expand('%:p'))
+command! Ruffcheckfix execute '!ruff check --fix ' . shellescape(expand('%:p'))
+command! Ansiblelint execute '!ansible-lint ' . shellescape(expand('%:p'))
