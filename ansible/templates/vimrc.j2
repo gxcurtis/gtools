@@ -43,12 +43,6 @@ nnoremap <C-w>l <C-w>k
 nnoremap <C-w>; <C-w>l
 nnoremap <C-w>h <C-w>;
 
-" YAML, HTML, CSS 
-augroup ft_others
-  autocmd!
-  autocmd FileType yaml,html,css setlocal expandtab tabstop=2 softtabstop=2 shiftwidth=2
-augroup END
-
 " User defined commands
 command! -nargs=* Shellcheck execute '!shellcheck ' . shellescape(expand('%:p'))
 command! -nargs=* Ruffcheck execute '!ruff check ' . shellescape(expand('%:p'))
@@ -59,3 +53,7 @@ autocmd BufNewFile *.{yml,yaml} call append(0, '---')
 autocmd BufNewFile *.{sh,bash} call append(0, '#!/usr/bin/env bash')
 autocmd BufNewFile *.py call append(0, '#!/usr/bin/env python3')
 
+augroup ft_others
+  autocmd!
+  autocmd FileType yaml,html,css setlocal expandtab tabstop=2 softtabstop=2 shiftwidth=2
+augroup END
