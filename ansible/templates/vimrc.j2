@@ -18,24 +18,16 @@ for scheme in ['apprenctice', 'slate', 'default']
 endfor
 
 " Navigation keybindings
-inoremap <A-j> <Esc>
-nnoremap j h
-nnoremap k j
-nnoremap l k
-nnoremap ; l
-nnoremap h ;
-
-vnoremap j h
-vnoremap k j
-vnoremap l k
-vnoremap ; l
-vnoremap h ;
-
-onoremap j h
-onoremap k j
-onoremap l k
-onoremap ; l
-onoremap h ;
+inoremap <A-a> <Esc>
+noremap <A-j> <Home>
+noremap <A-k> <PageDown>
+noremap <A-l> <PageUp>
+noremap <A-;> <End>
+noremap j h
+noremap k j
+noremap l k
+noremap ; l
+noremap h ;
 
 nnoremap <C-w>j <C-w>h
 nnoremap <C-w>k <C-w>j
