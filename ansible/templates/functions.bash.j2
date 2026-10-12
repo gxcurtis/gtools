@@ -9,6 +9,47 @@ gitm() {
     git push
 }
 
+# Message border spanning terminal width
+msgborder() {
+    local OPTIND=1
+    local OPTARG opt line padding
+    local char='='
+    local color=15
+    local width="$COLUMNS"
+    local msg=''
+
+    while getopts ":s:c:w:m:" opt; do
+        case "$opt" in
+            s) char="$OPTARG"
+            ;;
+            c) color="$OPTARG"
+            ;;
+            w) width="$OPTARG"
+            ;;
+            m) msg="$OPTARG"
+            ;;
+            :) printf 'Missing argument: -%s\n' "$OPTARG" >&2 ; exit 2
+            ;;
+            \?) printf 'Invalid option: -%s' "$OPTARG" >&2 ; exit 2
+            ;;
+        esac
+    done
+
+    color=$((color % 256))
+
+    if [[ -z $msg ]]; then
+        printf -v line '%*s' "$width" ''
+        printf '\033[38;5;%sm%s\033[0m\n' "$color" "${line// /$char}"
+    else
+{% raw %}
+        width=$((width - ${#msg} - 1))
+{% endraw %}
+        printf -v line '%*s' "$width" ''
+        printf '\033[38;5;%sm%s ' "$color" "$msg"
+        printf '%s\033[0m\n' "${line// /$char}"
+    fi
+}
+
 # find + xargs
 findx() {
   local target
