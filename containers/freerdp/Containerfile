@@ -1,0 +1,7 @@
+FROM quay.io/fedora/fedora-minimal:44
+
+RUN dnf install -y --setopt=install_weak_deps=False freerdp krb5-workstation ca-certificates && dnf clean all
+
+ENV KRB5CCNAME=FILE:/tmp/krb5cc_freerdp
+
+ENTRYPOINT ["/usr/bin/xfreerdp"]
