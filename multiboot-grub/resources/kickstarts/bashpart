@@ -1,48 +1,145 @@
 #!/usr/bin/env bash
 #%pre --log=/tmp/pre.log
 
+partfile=/tmp/partition-scheme
+encrypted=false
+encryption_password=''
+vgname=os
+swap=true
+bootefi_size=600 # MiB...
+boot_size=1024 # MiB...
+default_lvsize=4096 # MiB...
+
+KiB=1024 # 1024 Bytes
+(( MiB = KiB * 1024 )) # 1048576 Bytes
+(( GiB = MiB * 1024 )) # 1073741824 Bytes
+(( TiB = GiB * 1024 )) # 1099511627776 Bytes
+
+# Min/Max disk size in bytes
+(( MIN_SIZE = (default_lvsize * MiB * 22) + (32 * GiB) ))
+(( MAX_SIZE = 2 * TiB ))
+
+# Determine encryption flags
+if [[ -n $encryption_password && $encrypted == true ]]; then
+    encryption_flags="--encrypted --passphrase=$encryption_password"
+else
+    encryption_flags=''
+fi
+
 pass() {
+# Do nothing function
     return
 }
 
-((G = 1024 ** 3))
-((T = G * 1024))
-# Min/Max disk size in bytes
-((MIN_SIZE = 40 * G))
-((MAX_SIZE = 2 * T))
+emit_lvm() {
+# LVM allocation scheme
+
+    if [[ $swap == true ]]; then
+        local swap_line="logvol swap --vgname=$vgname --name=swap --fsytype=swap --recommended"
+    else
+        local swap_line=''
+    fi
+
+    cat >> "$partfile" << EOF
+volgroup $vgname pv.01
+
+logvol / --vgname=$vgname --name=root --fstype=xfs --size=$((default_lvsize * 10))
+logvol /home --vgname=$vgname --name=home --fstype=xfs --size=$((default_lvsize * 5))
+logvol /tmp --vgname=$vgname --name=tmp --fstype=xfs --size=$default_lvsize
+logvol /var --vgname=$vgname --name=var --fstype=xfs --size=$default_lvsize
+logvol /var/tmp --vgname=$vgname --name=vartmp --fstype=xfs --size=$default_lvsize
+logvol /var/log --vgname=$vgname --name=varlog --fstype=xfs --size=$default_lvsize
+logvol /var/log/audit --vgname=$vgname --name=audit --fstype=xfs --size=$default_lvsize
+logvol /var/log/journal --vgname=$vgname --name=journal --fstype=xfs --size=$default_lvsize
+logvol /scratch --vgname=$vgname --name=scratch --fstype=xfs --size=$default_lvsize
+$swap_line
+EOF
+}
+
+emit_single() {
+# Set single disk partition scheme
+    test -n "$1" || exit 1
+    local os_disk="$1"
+
+    cat > "$partfile" << EOF
+ignoredisk --only-use=$os_disk
+
+part /boot/efi --fstype=efi --size=$bootefi_size --ondisk=$os_disk
+part /boot --fstype=xfs --size=$boot_size --ondisk=$os_disk
+part pv.01 --fstype=lvmpv --size=1 --grow --ondisk=$os_disk $encryption_flags
+
+EOF
+}
+
+
+emit_raid1() {
+# Set double disk raid 1 partition scheme
+    test -n "$1" || exit 1
+    test -n "$2" || exit 2
+    local os_disk1="$1"
+    local os_disk2="$2"
+
+    cat > "$partfile" << EOF
+ignoredisk --only-use=$os_disk1,$os_disk2
+
+part raid.01 --size=$bootefi_size --ondisk=$os_disk1
+part raid.02 --size=$bootefi_size --ondisk=$os_disk2
+raid /boot/efi --device=md0 --level=1 --fstype=efi raid.01 raid.02
+
+part raid.11 --size=$boot_size --ondisk=$os_disk1
+part raid.12 --size=$boot_size --ondisk=$os_disk2
+raid /boot --device=md1 --level=1 --fstype=xfs raid.11 raid.12
+
+part raid.21 --size=1 --grow --ondisk=$os_disk1
+part raid.22 --size=1 --grow --ondisk=$os_disk2
+raid pv.01 --device=md2 --level=1 --fstype=lvmpv raid.21 raid.22 $encryption_flags
+
+EOF
+}
 
 # Filter for qualified disks
 filtered_disks=()
 smallest_disk=''
 while read -r name size removable; do
     if ((removable == 1)); then
+    # Skip removable media
         pass
-
     elif [[ ! "$name" =~ ^(vd|sd|nvme) ]]; then
+    # Filter for target block device types
         pass
-
     elif (( size < MIN_SIZE || size > MAX_SIZE )); then
+    # Disk size out of range
         pass
-
     elif [[ -z "$smallest_disk" ]]; then
+    # Set initial smallest disk
         smallest_disk="$name"
         filtered_disks+=("$smallest_disk")
-
     elif (( smallest_disk < size )); then
+    # Skip larger
         pass
-
     elif (( smallest_disk > size )); then
+    # Set new smallest
         smallest_disk="$name"
         filtered_disks=("$name")
-
     elif [[ "${smallest_disk:0:2}" == "${name:0:2}" ]]; then 
+    # Add same size same type 
         filtered_disks+=("$name")
-
     else
+    # No matching criteria
         pass
-                
     fi
 done < <(lsblk -ndbo NAME,SIZE,RM)
 
-echo "Smallest disk: $smallest_disk"
-echo "Filtered disk(s): ${#filtered_disks[@]}"
+num_disks="${#filtered_disks[@]}"
+
+if [[ $num_disks -lt 1 ]]; then
+    printf 'ERROR: NO DISKS FOUND!\n'
+    exit 1
+elif [[ $num_disks -eq 1 ]]; then
+    emit_single "${filtered_disks[0]}"
+else
+    emit_raid1 "${filtered_disks[0]}" "${filtered_disks[1]}"
+fi
+
+emit_lvm
+
