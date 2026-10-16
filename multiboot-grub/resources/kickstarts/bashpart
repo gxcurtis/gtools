@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #%pre --log=/tmp/pre.log
 
-partfile=/tmp/partition-scheme
+partfile="${1:-/tmp/partition-scheme}"
 encrypted=false
 encryption_password=''
 vgname=os
@@ -40,7 +40,7 @@ emit_lvm() {
         local swap_line=''
     fi
 
-    cat >> "$partfile" << EOF
+    cat << EOF
 volgroup $vgname pv.01
 
 logvol / --vgname=$vgname --name=root --fstype=xfs --size=$((default_lvsize * 10))
@@ -61,7 +61,7 @@ emit_single() {
     test -n "$1" || exit 1
     local os_disk="$1"
 
-    cat > "$partfile" << EOF
+    cat << EOF
 ignoredisk --only-use=$os_disk
 
 part /boot/efi --fstype=efi --size=$bootefi_size --ondisk=$os_disk
@@ -79,7 +79,7 @@ emit_raid1() {
     local os_disk1="$1"
     local os_disk2="$2"
 
-    cat > "$partfile" << EOF
+    cat << EOF
 ignoredisk --only-use=$os_disk1,$os_disk2
 
 part raid.01 --size=$bootefi_size --ondisk=$os_disk1
@@ -136,10 +136,10 @@ if [[ $num_disks -lt 1 ]]; then
     printf 'ERROR: NO DISKS FOUND!\n'
     exit 1
 elif [[ $num_disks -eq 1 ]]; then
-    emit_single "${filtered_disks[0]}"
+    emit_single "${filtered_disks[0]}" > "$partfile"
 else
-    emit_raid1 "${filtered_disks[0]}" "${filtered_disks[1]}"
+    emit_raid1 "${filtered_disks[0]}" "${filtered_disks[1]}" > "$partfile"
 fi
 
-emit_lvm
+emit_lvm >> "$partfile"
 
