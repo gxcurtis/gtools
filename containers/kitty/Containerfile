@@ -1,0 +1,9 @@
+FROM quay.io/fedora/fedora-minimal:44
+
+RUN microdnf install -y kitty libglvnd-glx mesa-libGL mesa-dri-drivers && microdnf clean all
+RUN sed -i 's/self\.encryption_key = .*/self\.encryption_key = None/g' /usr/lib64/kitty/kitty/boss.py
+RUN sed -i 's/self\.encryption_public_key = .*/self\.encryption_public_key = ""/g' /usr/lib64/kitty/kitty/boss.py
+RUN sed -i '/^[[:blank:]]*d = AES256GCMDecrypt/i\        if encryption_key is None:\n            return {}' /usr/lib64/kitty/kitty/remote_control.py
+RUN find /usr/lib64/kitty/kitty/__pycache__ -maxdepth 1 -type f \( -name 'boss.*.pyc' -o -name 'remote_control.*.pyc' \) -print -delete
+
+ENTRYPOINT ["/usr/bin/kitty"]
