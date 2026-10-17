@@ -1,5 +1,4 @@
-#!/usr/bin/env bash
-#%pre --log=/tmp/pre.log
+%pre --interpreter=/usr/bin/bash --log=/tmp/pre-kickstart.log --erroronfail
 
 partfile="${1:-/tmp/partition-scheme}"
 encrypted=false
@@ -19,23 +18,18 @@ KiB=1024 # 1024 Bytes
 (( MIN_SIZE = (default_lvsize * MiB * 22) + (32 * GiB) ))
 (( MAX_SIZE = 2 * TiB ))
 
-# Determine encryption flags
-if [[ -n $encryption_password && $encrypted == true ]]; then
+# Determine encryption
+if [[ -n $encryption_password ]]; then
     encryption_flags="--encrypted --passphrase=$encryption_password"
 else
     encryption_flags=''
 fi
 
-pass() {
-# Do nothing function
-    return
-}
-
 emit_lvm() {
 # LVM allocation scheme
 
     if [[ $swap == true ]]; then
-        local swap_line="logvol swap --vgname=$vgname --name=swap --fsytype=swap --recommended"
+        local swap_line="logvol swap --vgname=$vgname --name=swap --fstype=swap --recommended"
     else
         local swap_line=''
     fi
@@ -63,6 +57,8 @@ emit_single() {
 
     cat << EOF
 ignoredisk --only-use=$os_disk
+clearpart --all --initlabel --drives=$os_disk
+zerombr
 
 part /boot/efi --fstype=efi --size=$bootefi_size --ondisk=$os_disk
 part /boot --fstype=xfs --size=$boot_size --ondisk=$os_disk
@@ -70,7 +66,6 @@ part pv.01 --fstype=lvmpv --size=1 --grow --ondisk=$os_disk $encryption_flags
 
 EOF
 }
-
 
 emit_raid1() {
 # Set double disk raid 1 partition scheme
@@ -81,6 +76,8 @@ emit_raid1() {
 
     cat << EOF
 ignoredisk --only-use=$os_disk1,$os_disk2
+clearpart --all --initlabel --drives=$os_disk
+zerombr
 
 part raid.01 --size=$bootefi_size --ondisk=$os_disk1
 part raid.02 --size=$bootefi_size --ondisk=$os_disk2
@@ -97,37 +94,38 @@ raid pv.01 --device=md2 --level=1 --fstype=lvmpv raid.21 raid.22 $encryption_fla
 EOF
 }
 
+get_install_disk() {
+    local instdisk
+    instdisk="$(readlink -f /dev/disk/by-label/INSTALL)" || return 1
+    lsblk -ndo NAME "$instdisk"
+}
+
 # Filter for qualified disks
+install_disk="$(get_install_disk)"
 filtered_disks=()
 smallest_disk=''
+smallest_size=''
 while read -r name size removable; do
-    if ((removable == 1)); then
-    # Skip removable media
-        pass
-    elif [[ ! "$name" =~ ^(vd|sd|nvme) ]]; then
-    # Filter for target block device types
-        pass
-    elif (( size < MIN_SIZE || size > MAX_SIZE )); then
-    # Disk size out of range
-        pass
-    elif [[ -z "$smallest_disk" ]]; then
+    ((removable == 1)) || continue
+    [[ ! "$name" =~ ^(vd|sd|nvme) ]] || continue
+    (( size < MIN_SIZE || size > MAX_SIZE )) || continue
+    
+    if [[ -z "$smallest_disk" ]]; then
     # Set initial smallest disk
         smallest_disk="$name"
+        smallest_size="$size"
         filtered_disks+=("$smallest_disk")
-    elif (( smallest_disk < size )); then
-    # Skip larger
-        pass
-    elif (( smallest_disk > size )); then
-    # Set new smallest
-        smallest_disk="$name"
-        filtered_disks=("$name")
-    elif [[ "${smallest_disk:0:2}" == "${name:0:2}" ]]; then 
-    # Add same size same type 
-        filtered_disks+=("$name")
-    else
-    # No matching criteria
-        pass
     fi
+
+    (( smallest_size < size )) || continue
+    
+    if (( smallest_size > size )); then 
+        smallest_disk="$name"
+        smallest_size="$size"
+        filtered_disks=("$name")
+    fi
+
+    [[ "${smallest_disk:0:2}" == "${name:0:2}" ]] || filtered_disks+=("$name")
 done < <(lsblk -ndbo NAME,SIZE,RM)
 
 num_disks="${#filtered_disks[@]}"
@@ -142,4 +140,6 @@ else
 fi
 
 emit_lvm >> "$partfile"
+
+%end
 

@@ -1,0 +1,11 @@
+%post --interpreter=/usr/bin/bash --log=/tmp/post-kickstart.log --erroronfail
+
+systemctl enable sshd
+systemctl enable chronyd
+systemctl enable NetworkManager
+systemctl enable serial-getty@ttyS0.service
+
+echo 'ansible ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/ansible
+
+%end
+
