@@ -7,7 +7,7 @@ vgname=os
 swap=true
 bootefi_size=600 # MiB...
 boot_size=1024 # MiB...
-default_lvsize=4096 # MiB...
+default_lvsize=2048 # MiB...
 
 KiB=1024 # 1024 Bytes
 (( MiB = KiB * 1024 )) # 1048576 Bytes
@@ -15,7 +15,7 @@ KiB=1024 # 1024 Bytes
 (( TiB = GiB * 1024 )) # 1099511627776 Bytes
 
 # Min/Max disk size in bytes
-(( MIN_SIZE = (default_lvsize * MiB * 22) + (32 * GiB) ))
+(( MIN_SIZE = default_lvsize * MiB * 24 + (2 * GiB) ))
 (( MAX_SIZE = 2 * TiB ))
 
 # Determine encryption
@@ -76,7 +76,7 @@ emit_raid1() {
 
     cat << EOF
 ignoredisk --only-use=$os_disk1,$os_disk2
-clearpart --all --initlabel --drives=$os_disk
+clearpart --all --initlabel --drives=$os_disk1,$os_disk2
 zerombr
 
 part raid.01 --size=$bootefi_size --ondisk=$os_disk1
@@ -95,40 +95,49 @@ EOF
 }
 
 get_install_disk() {
-    local instdisk
-    instdisk="$(readlink -f /dev/disk/by-label/INSTALL)" || return 1
-    lsblk -ndo NAME "$instdisk"
+    local device parent
+    device="$(readlink -f /dev/disk/by-label/INSTALL)" || return 1
+    parent="$(lsblk -no PKNAME $device)" || return 1
+
+    if [[ -n "$parent" ]]; then
+        device="$parent"
+    else
+        device="${device##*/}"
+    fi
+
+    printf '%s' "$device" 
 }
 
 # Filter for qualified disks
 install_disk="$(get_install_disk)"
+test -n "$install_disk || exit 1
+
 filtered_disks=()
 smallest_disk=''
-smallest_size=''
+smallest_disk_size=0
 while read -r name size removable; do
-    ((removable == 1)) || continue
-    [[ ! "$name" =~ ^(vd|sd|nvme) ]] || continue
-    (( size < MIN_SIZE || size > MAX_SIZE )) || continue
+    [[ "$install_disk" != "$name" ]] || continue
+    ((removable == 0)) || continue
+    [[ "$name" =~ ^(vd|sd|nvme) ]] || continue
+    (( MIN_SIZE <= size && size <= MAX_SIZE )) || continue
+
     
-    if [[ -z "$smallest_disk" ]]; then
+    if (( smallest_disk_size == 0 || size < smallest_disk_size )); then
     # Set initial smallest disk
         smallest_disk="$name"
-        smallest_size="$size"
-        filtered_disks+=("$smallest_disk")
+        smallest_disk_size="$size"
+        filtered_disks=("$smallest_disk")
+    elif (( smallest_disk_size == size )); then
+        filtered_disks+=("$name")
+    else
+        continue
     fi
 
-    (( smallest_size < size )) || continue
-    
-    if (( smallest_size > size )); then 
-        smallest_disk="$name"
-        smallest_size="$size"
-        filtered_disks=("$name")
-    fi
-
-    [[ "${smallest_disk:0:2}" == "${name:0:2}" ]] || filtered_disks+=("$name")
 done < <(lsblk -ndbo NAME,SIZE,RM)
 
 num_disks="${#filtered_disks[@]}"
+
+default_lvsize_bytes=$((default_lvsize * MiB))
 
 if [[ $num_disks -lt 1 ]]; then
     printf 'ERROR: NO DISKS FOUND!\n'
@@ -138,6 +147,14 @@ elif [[ $num_disks -eq 1 ]]; then
 else
     emit_raid1 "${filtered_disks[0]}" "${filtered_disks[1]}" > "$partfile"
 fi
+
+for (( i=10; i>1; i-- )); do
+    potential_size=$(( default_lvsize_bytes * i * 24 + (2 * GiB) ))
+    if (( potential_size < smallest_disk_size )); then
+        default_lvsize=$(( default_lvsize * i ))
+        break
+    fi
+done
 
 emit_lvm >> "$partfile"
 
