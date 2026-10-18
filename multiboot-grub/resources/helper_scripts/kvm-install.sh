@@ -5,8 +5,8 @@ VCPUS=2
 MEMORY=4096
 DISK_SIZE=120
 INSTALL_DISK='installer-disk.img'
-BOOT='uefi'
-# BOOT='/usr/share/edk2/ovmf/OVMF_CODE.fd' 
+#BOOT='uefi'
+BOOT='loader=/usr/share/edk2/ovmf/OVMF_CODE.fd' 
 OS='linux2024'
 
 while getopts ':o:n:c:m:d:i:b:' opt; do
@@ -41,5 +41,6 @@ virt-install --name "$VM_NAME" \
     --console pty,target.type=serial \
     --serial pty \
     --graphics spice \
-    --boot "$BOOT"
+    --boot "$BOOT" \
+    --noautoconsole
 
