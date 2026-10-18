@@ -70,10 +70,3 @@ prompt_env() {
   fi
 }
 
-{% if add_situational_functions %}
-# Monitor Brightness
-set-brightness() {
-  sudo ddcutil --display 1 setvcp 10 "$1"
-  sudo ddcutil --display 2 setvcp 10 "$1"
-}
-{% endif %}

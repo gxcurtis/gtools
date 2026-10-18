@@ -8,9 +8,6 @@
     - vars/escape_sequences.yml
     - vars/bash_prompts.yml
     - vars/bash_aliases.yml
-  vars:
-    add_situational_functions: false
-    remove_old: false
   tasks:
     - name: Set facts about user
       set_fact:
@@ -32,21 +29,6 @@
           done
         path: "{{ u.home }}/.bashrc"
         state: present
-
-    - name: Find old bashrc configs
-      find:
-        paths: "{{ u.home }}/.bashrc.d"
-        patterns: 'bash_*'
-        file_type: file
-      register: old_bash
-      when: remove_old | bool
-
-    - name: Remove old bashrc configs
-      file:
-        path: "{{ item.path }}"
-        state: absent
-      loop: "{{ old_bash.files }}"
-      when: remove_old | bool
                 
     - name: Add bashrc template files
       template:
@@ -59,17 +41,19 @@
         - functions.bash
         - variables.bash
 
-    - name: Create nvim configuration base directory
+    - name: Add vimrc config
+      template:
+        src: templates/vim/vimrc.j2
+        dest: "{{ u.home }}/.vimrc"
+    
+    - name: Make vim templates directory
       file:
-        path: "{{ u.home }}/.config/nvim"
+        path: "{{ u.home }}/.vim/templates"
         state: directory
 
-    - name: Add vimrc template file
+    - name: Add vim templates
       template:
-        src: templates/vimrc.j2
-        dest: "{{ u.home }}/.vimrc"
-        backup: true
-      loop:
-        - "{{ u.home }}/.vimrc"
-        - "{{ u.home }}/.config/nvim/init.vim"
-    
+        src: "templates/vim/{{ item.filename }}.j2"
+        dest: "~/.vim/templates/{{ item.filename }}"
+      loop: "{{ vim_templates }}"
+

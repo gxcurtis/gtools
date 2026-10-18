@@ -1,0 +1,4 @@
+---
+vim_templates:
+  - cmd_name: Getopts
+    filename: getopts-template.sh

@@ -9,7 +9,7 @@ elif [[ -f ./ansible/.venv/bin/ansible-playbook ]]; then
 else
   echo "Couldn't find ansible, attempting to install in python venv"
   sleep 1
-  ./ansible/setup-pyvenv.sh
+  ./ansible/init-venv.sh
   APB='./ansible/.venv/bin/ansible-playbook'
 fi
 

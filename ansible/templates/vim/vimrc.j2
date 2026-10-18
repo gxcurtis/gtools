@@ -40,6 +40,11 @@ command! -nargs=* Shellcheck execute '!shellcheck ' . shellescape(expand('%:p'))
 command! -nargs=* Ruffcheck execute '!ruff check ' . shellescape(expand('%:p'))
 command! Ansiblelint execute '!ansible-lint ' . shellescape(expand('%:p'))
 
+" Templates as commands
+{% for vt in vim_templates %}
+command! {{ vt.cmd_name | title }} execute 'read' fnameescape(expand('~/.vim/templates/{{ item.filename }}'))
+{% endfor %}
+
 " Auto commands
 autocmd BufNewFile *.{yml,yaml} call append(0, '---')
 autocmd BufNewFile *.{sh,bash} call append(0, '#!/usr/bin/env bash')
