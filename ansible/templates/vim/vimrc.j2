@@ -42,7 +42,7 @@ command! Ansiblelint execute '!ansible-lint ' . shellescape(expand('%:p'))
 
 " Templates as commands
 {% for vt in vim_templates %}
-command! {{ vt.cmd_name | title }} execute 'read' fnameescape(expand('~/.vim/templates/{{ item.filename }}'))
+command! {{ vt.cmd_name | title }} execute 'read' fnameescape(expand('~/.vim/templates/{{ vt.filename }}'))
 {% endfor %}
 
 " Auto commands

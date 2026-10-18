@@ -8,6 +8,7 @@
     - vars/escape_sequences.yml
     - vars/bash_prompts.yml
     - vars/bash_aliases.yml
+    - vars/vim.yml
   tasks:
     - name: Set facts about user
       set_fact:

@@ -1,5 +1,5 @@
 #OPTIND=
-#OPTARGs
+#OPTARGs=
 while getopts ':h'; do
     case "$opts" in
         h) printf 'HELP: Add options!' ;;
@@ -7,3 +7,6 @@ while getopts ':h'; do
         \?) printf 'Invalid argument -%s' "$OPTARG" ;;
     esac
 done
+
+shift (( OPTIND - 1 ))
+
