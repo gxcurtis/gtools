@@ -7,5 +7,15 @@ systemctl enable serial-getty@ttyS0.service
 
 echo 'ansible ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/ansible
 
+ansible-galaxy collections install -p /usr/share/ansible/collections/ -r <( cat <<EOF
+---
+collections:
+    - community.crypto
+    - community.general
+    - ansible.posix
+EOF
+)
+
+
 %end
 

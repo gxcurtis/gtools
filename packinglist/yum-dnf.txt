@@ -1,4 +1,0 @@
-bsdtar
-pipx
-python3-ruff
-ShellCheck
