@@ -9,6 +9,7 @@ ghash = 'grub.pbkdf2.sha512.10000.505CDD3B289AE7C8A96A7177086DE19795DA667245A949
 
 def build_parser():
     parser = argparse.ArgumentParser()
+    parser.add_argument('-o', '--output', type=str, default='generated.ks', help="Set output path of kickstart")
     parser.add_argument('-H', '--hostname', type=str, default='localhost', help="Set hostname")
     parser.add_argument('-t', '--timezone', type=str, default='Etc/UTC', help='Set timezone')
     parser.add_argument('-i', '--installation-type', choices=['text', 'graphical', 'cmdline'], default='text', help='Set installation type')
@@ -71,12 +72,9 @@ if __name__ == '__main__':
     args = build_parser()
     kickstart = assemble_kickstart(args)
 
-    if args.hostname == 'localhost':
-        ksfile="default.ks"
-    else:
-        ksfile=f"{args.hostname}.ks"
+    ksfile = args.output
 
-    with open(f"../kickstarts/{ksfile}", "w") as f:
+    with open(ksfile, "w") as f:
         f.write(kickstart)
 
 
