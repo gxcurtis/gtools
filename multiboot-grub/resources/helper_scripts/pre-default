@@ -1,7 +1,6 @@
 %pre --interpreter=/usr/bin/bash --log=/tmp/pre-kickstart.log --erroronfail
 
 partfile="${1:-/tmp/partition-scheme}"
-encrypted=false
 encryption_password=''
 vgname=os
 swap=true
@@ -97,7 +96,7 @@ EOF
 get_install_disk() {
     local device parent
     device="$(readlink -f /dev/disk/by-label/INSTALL)" || return 1
-    parent="$(lsblk -no PKNAME $device)" || return 1
+    parent="$(lsblk -no PKNAME "$device")" || return 1
 
     if [[ -n "$parent" ]]; then
         device="$parent"
@@ -110,7 +109,7 @@ get_install_disk() {
 
 # Filter for qualified disks
 install_disk="$(get_install_disk)"
-test -n "$install_disk || exit 1
+test -n "$install_disk" || exit 1
 
 filtered_disks=()
 smallest_disk=''
