@@ -1,0 +1,21 @@
+-- Neovim settings
+vim.opt.tabstop = 4
+vim.opt.shiftwidth = 4
+vim.opt.shifttabstop = 4
+vim.opt.expandtab = true
+vim.opt.autoindent = true
+vim.opt.smartindent = true
+vim.opt.number = true
+
+vim.keymap.set("", "j", "h")
+vim.keymap.set("", "k", "j")
+vim.keymap.set("", "l", "k")
+vim.keymap.set("", ";", "l")
+vim.keymap.set("", "h", ";")
+
+vim.keymap.set("n", "<C-w>j", "<C-w>h")
+vim.keymap.set("n", "<C-w>k", "<C-w>j")
+vim.keymap.set("n", "<C-w>l", "<C-w>k")
+vim.keymap.set("n", "<C-w>;", "<C-w>l")
+vim.keymap.set("n", "<C-w>h", "<C-w>;")
+
