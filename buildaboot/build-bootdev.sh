@@ -75,8 +75,8 @@ partition_device() {
     umount -f "$DATA_MOUNTPOINT"
   fi
 
-  wipefs -a "$device"
   sgdisk --zap-all "$device"
+  wipefs -a "$device"
   dd if=/dev/zero of="$device" bs=1M count=16 conv=fsync
   parted --script --align optimal "$device" \
     mklabel gpt \
