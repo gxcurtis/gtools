@@ -29,3 +29,11 @@ XTerm*metaSendsEscape: true
 
 ! Advertise 256-color support
 XTerm*termName: xterm-256color
+
+! Automatically copy selected text to the system clipboard
+XTerm*selectToClipboard: true
+
+! Ctrl+Shift+C to copy; Ctrl+Shift+V to paste
+XTerm*VT100.Translations: #override \n\
+    Ctrl Shift <Key>C: copy-selection(CLIPBOARD) \n\
+    Ctrl Shift <Key>V: insert-selection(CLIPBOARD)
