@@ -12,7 +12,7 @@ def build_parser():
     parser.add_argument('-o', '--output', type=str, default='generated.ks', help="Set output path of kickstart")
     parser.add_argument('-H', '--hostname', type=str, default='localhost', help="Set hostname")
     parser.add_argument('-t', '--timezone', type=str, default='Etc/UTC', help='Set timezone')
-    parser.add_argument('-i', '--installation-type', choices=['text', 'graphical', 'cmdline'], default='text', help='Set installation type')
+    parser.add_argument('-i', '--interface-type', choices=['text', 'graphical', 'cmdline'], default='text', help='Set interface type')
     parser.add_argument('-x', '--after-action', choices=['halt', 'reboot', 'poweroff', 'shutdown'], default='reboot', help='Set action to perform after kickstart')
     parser.add_argument('-n', '--network', choices=['static','dhcp'], default='dhcp', help='Configure network')
     parser.add_argument('-r', '--rootpw', type=str, default=rhash, help='Set root password hash')
@@ -47,7 +47,7 @@ def assemble_kickstart(args):
         keyboard --vckeymap=us --xlayouts='us'
         timezone {args.timezone} --utc 
         
-        {args.installation_type}
+        {args.interface_type}
         {args.after_action}
         firstboot --disable
         eula --agreed
