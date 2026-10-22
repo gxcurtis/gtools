@@ -1,0 +1,139 @@
+{
+   "lang": "en_US.UTF-8",
+   "keyboard": {
+      "vckeymap": "us",
+      "xlayouts": "us"
+   },
+   "timezone": "Etc/UTC",
+   "interface_type": "text",
+   "system_action": "reboot",
+   "eula": "agreed",
+   "firstboot": "disable",
+   "firewall": {
+      "enabled": true,
+      "system_defaults": true,
+      "ssh": true,
+      "http": false,
+      "ftp": false,
+      "smtp": false,
+      "ports": [],
+      "services": []
+   },
+   "network": {
+      "bootproto": "dhcp",
+      "hostname": "",
+      "device": "link",
+      "activate": true,
+      "ipv4": {
+         "enabled": true,
+         "address": "",
+         "gateway": "",
+         "netmask": "",
+         "dns_search": "",
+         "auto_dns": true
+      },
+      "ipv6": {
+         "enabled": true,
+         "address": "",
+         "gateway": "",
+         "dns_search": "",
+         "auto_dns": true
+      },
+      "no_defroute": false,
+      "no_dns": false,
+      "nameservers": [],
+      "mtu": 1500,
+      "bond": {
+         "slaves": [],
+         "opts": []
+      },
+      "vlan": {
+         "id": 0,
+         "interface_name": ""
+      },
+      "bridge": {
+         "slaves": [],
+         "opts": []
+      }
+   },
+   "logging": {
+      "host": "",
+      "port": ""
+   },
+   "selinux": "enforcing",
+   "rootpw": {
+      "iscrypted": true,
+      "locked": true,
+      "password": ""
+   },
+   "bootloader": {
+      "location": "mbr",        
+      "args": [
+         "console=tty0",
+         "console=ttyS0,115200n8"
+      ],
+      "iscrypted": true,
+      "password": "",
+      "superuser": "root"
+   },
+   "users": [
+      {
+         "name": "ansible",
+         "password": "",
+         "iscrypted": true,
+         "homedir": "/home/ansible",
+         "shell": "/bin/bash",
+         "gecos": "Ansible Admin",
+         "groups": ["wheel"],
+         "sshkey": ""
+      }  
+   ],
+   "groups": [],
+   "services": {
+      "enabled": ["sshd"],
+      "disabled": []
+   },
+   "partition": {
+      "template": "pre-storage-script.j2",
+      "tmpfile": "/tmp/part-include",
+      "vgname": "os",
+      "swap": true,
+      "crypt_passphrase": ""
+   },
+   "openscap": {
+      "hardening": false,
+      "content_type": "scap-security-guide",
+      "profile": "xccdf_org.ssgproject.content_profile_stig"
+   },
+   "packages": {
+      "list": [
+         "@core",
+         "git",
+         "curl",
+         "tmux",
+         "rsync",
+         "openssl",
+         "tcpdump",
+         "nmap-ncat",
+         "vim-enhanced",
+         "bash-completion",
+         "openscap-scanner",
+         "scap-security-guide",
+         "python3",
+         "python3-pip",
+         "ansible-core",
+         "policycoreutils-python-utils",
+         "bind-utils",
+         "yum-utils",
+         "nfs-utils",
+         "info",
+         "man-db",
+         "man-pages"
+      ],
+      "ignore_missing": true,
+      "ignore_broken": false,
+      "weak_deps": true
+   },
+   "pre_ks_templates": [],
+   "post_ks_templates": ["default-post-ks.j2"]
+}

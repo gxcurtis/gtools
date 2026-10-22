@@ -50,7 +50,13 @@ autocmd BufNewFile *.{yml,yaml} call append(0, '---')
 autocmd BufNewFile *.{sh,bash} call append(0, '#!/usr/bin/env bash')
 autocmd BufNewFile *.py call append(0, '#!/usr/bin/env python3')
 
-augroup ft_others
+augroup two_space
   autocmd!
-  autocmd FileType yaml,html,css setlocal expandtab tabstop=2 softtabstop=2 shiftwidth=2
+  autocmd BufRead,BufNewFile *.j2 setfiletype jinja
+  autocmd FileType jinja,jinja2,htmldjango,yaml setlocal expandtab tabstop=2 softtabstop=2 shiftwidth=2
+augroup END
+
+augroup three_space
+  autocmd!
+  autocmd FileType sh,json,bash,html,css setlocal expandtab tabstop=3 softtabstop=3 shiftwidth=3
 augroup END
