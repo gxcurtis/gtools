@@ -43,16 +43,15 @@ network --bootproto={{ network.bootproto }} --device={{ network.device }}
 
   {%- endif %}
 
-{%- else %} 
- --noipv6
+{%- else %} --noipv6
 {%- endif %}
   
 {%- if network.mtu | int != 1500 %} --mtu={{ network.mtu }}{% endif %}
 {%- if network.no_defroute %} --nodefroute{% endif %}
 {%- if network.no_dns %} --nodns{% endif %}
-{%- if network.nameservers %} {{ network.nameservers | join(',') }}{% endif %}
-{%- if network.bond.slaves %} {{ network.bond.slaves | join(',') }} {% endif %}
-{%- if network.bond.opts %} {{ network.bond.opts | join(',') }} {% endif %}
+{%- if network.nameservers %} --nameserver={{ network.nameservers | join(',') }}{% endif %}
+{%- if network.bond.slaves %} --bondslaves={{ network.bond.slaves | join(',') }}{% endif %}
+{%- if network.bond.opts %} --bondopts={{ network.bond.opts | join(',') }}{% endif %}
 {%- if network.vlan.id | int != 0 %} --vlanid={{ network.vlan.id }} {%- if network.vlan.interface_name %} --interfacename={{ network.vlan.interface_name }}{% endif %}{% endif %}
 {%- if network.bridge.slaves %} --bridgeslaves={{ network.bridge.slaves | join(',') }}{% endif %}
 {%- if network.bridge.opts %} --bridgeopts={{ network.bridge.opts | join(',') }}{% endif %}
@@ -69,15 +68,15 @@ firewall --enable
   {%- if firewall.smtp %} --smtp{% endif %}
   {%- if firewall.ports %} --port={{ firewall.ports | join(',') }}{% endif %}
   {%- if firewall.services %} --service={{ firewall.services | join(',') }}{% endif %}
-{% endif %}
-{% if logging.host %}
+{%- endif %}
+{%- if logging.host %}
 logging --host={{ logging.host }}
   {%- if logging.port %} --port={{ logging.port }}{% endif %}
 {% endif %}
 {% if selinux %}selinux --{{ selinux }}{% endif %}
 rootpw {%- if rootpw.locked %} --lock{% endif %}
 {%- if rootpw.password %}
-{%- if rootpw.iscrypted %} --iscrypted{% endif %}
+{%- if rootpw.iscrypted %} --iscrypted {% endif -%}
  {{ rootpw.password }}
 {% endif %} 
 bootloader --location={{ bootloader.location }}
@@ -90,7 +89,7 @@ bootloader --location={{ bootloader.location }}
   {%- endif %}
 {%- endif %}
 {% for user in users %}
-{{ user.name }}
+user --name={{ user.name }}
   {%- if user.password %} --password={{ user.password }}
     {%- if user.iscrypted %} --iscrypted{% endif %}
   {%- endif %}
@@ -98,15 +97,18 @@ bootloader --location={{ bootloader.location }}
 {%- if user.shell %} --shell={{ user.shell }}{% endif %}
 {%- if user.gecos %} --gecos='{{ user.gecos }}'{% endif %}
 {%- if user.groups %} --groups={{ user.groups | join(' ') }}{% endif %}
-{% if user.sshkey %}user --username={{ user.name }} {{ user.sshkey }}{%- endif %}
+{% if user.sshkey %}sshkey --username={{ user.name }} "{{ user.sshkey }}"{%- endif %}
 {%- endfor %}
 
+%include "{{ partition.tmpfile }}"
+
 {%- if openscap.hardening %}
+
 %addon org_fedora_oscap
   content-type = {{ openscap.content_type }}
   profile = {{ openscap.profile }}
+%end
 {%- endif %}
-%include "{{ partition.tmpfile }}"
 
 {% include partition.template -%}
 

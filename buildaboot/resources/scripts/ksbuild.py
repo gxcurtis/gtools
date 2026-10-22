@@ -5,28 +5,36 @@ from jinja2 import Environment, FileSystemLoader, StrictUndefined
 
 def build_parser():
     parser = argparse.ArgumentParser()
-    parser.add_argument("json_file", type=str, help="Path to json file for input")
-    parser.add_argument("-o", "--output", type=str, default="build-product.ks", help="Set output path of kickstart")
+    parser.add_argument("outfile", type=str, help="Output file path")
+    parser.add_argument("-j", "--json-input", type=str, metavar="json_file", help="Json input file path")
+    parser.add_argument("-s", "--stig", action="store_true", help="Use defaults with additional STIG inputs")
 
     return parser.parse_args()
 
-def build_kickstart(json_input_file, json_default_file="json/kickstart-defaults.json"):
+def build_kickstart(args):
+    if args.stig:
+        json_default_file = "json/hardening-kickstart-defaults.json"
+    else:
+        json_default_file = "json/kickstart-defaults.json"
 
-    with open(json_input_file, "r") as f:
-        ks_inputs = json.load(f)
-    
     with open(json_default_file, "r") as f:
         ks_defaults = json.load(f)
 
-    ksdata = {}
-    for k, v in ks_defaults.items():
-        if k in ks_inputs:
-            ksdata[k] = ks_inputs[k]
-        else:
-            ksdata[k] = v
-    return ksdata
+    if args.json_input:
+        with open(args.json_input, "r") as f:
+            ks_inputs = json.load(f)
+
+        ksdata = {}
+        for k, v in ks_defaults.items():
+            if k in ks_inputs:
+                ksdata[k] = ks_inputs[k]
+            else:
+                ksdata[k] = v
+        return ksdata
+    else:
+        return ks_defaults
             
-def render_kickstart(ksdata: dict, output_file: str):
+def render_kickstart(ksdata: dict, outfile: str):
     if not isinstance(ksdata, dict):
         print(f"Kickstart data is not a dictionary. ksdata type={type(ksdata)}")
         print(ksdata)
@@ -42,12 +50,12 @@ def render_kickstart(ksdata: dict, output_file: str):
     
     rendered_kickstart = template.render(**ksdata)
 
-    with open(output_file, "w") as f:
+    with open(outfile, "w") as f:
         f.write(rendered_kickstart)
 
 if __name__ == '__main__':
     args = build_parser()
-    ksdata = build_kickstart(args.json_file)
+    ksdata = build_kickstart(args)
 
-    render_kickstart(ksdata, args.output)
+    render_kickstart(ksdata, args.outfile)
 
