@@ -2,6 +2,17 @@
 lang {{ lang }}
 keyboard --vckeymap={{ keyboard.vckeymap }} --xlayouts='{{ keyboard.xlayouts }}'
 timezone {{ timezone }}
+{%- if timesource.ntp_disable %}
+timesource --ntp-disable
+{%- elif timesource.servers %}
+  {%- for server in timesource.servers %}
+timesource --ntp-server={{ server }}
+  {%- endfor %}
+{%- elif timesource.pools %}
+  {%- for pool in timesource.pools %}
+timesource --ntp-pool={{ pool }}
+  {%- endfor %}
+{%- endif %}
 
 {{ interface_type }}
 {{ system_action }}

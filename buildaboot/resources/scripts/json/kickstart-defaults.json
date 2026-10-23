@@ -5,6 +5,11 @@
       "xlayouts": "us"
    },
    "timezone": "Etc/UTC",
+   "timesource": {
+      "ntp_disable": false,
+      "servers": [],
+      "pools": []
+   },
    "interface_type": "text",
    "system_action": "reboot",
    "eula": "agreed",
@@ -112,6 +117,7 @@
          "curl",
          "tmux",
          "rsync",
+         "chrony",
          "openssl",
          "tcpdump",
          "nmap-ncat",

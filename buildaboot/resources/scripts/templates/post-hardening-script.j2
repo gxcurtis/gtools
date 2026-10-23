@@ -28,4 +28,35 @@ else
     grub2-mkconfig -o /etc/grub2.cfg
 fi
 {%- endif %}
+
+# Update OpenSSH Ciphers + MACS per DISA STIG
+ssh_crypto_config=/etc/crypto-policies/back-ends/openssh.config
+if [[ -f $ssh_crypto_config ]]; then
+    cp "$ssh_crypto_config" "${ssh_crypto_config}.bak" || exit 1
+
+    if sed -E -i \
+        -e 's/^[#[:space:]]*Ciphers[[:space:]]+.*$/Ciphers aes256-ctr,aes192-ctr,aes128-ctr,aes256-gcm@openssh.com,aes128-gcm@openssh.com/g' \
+        -e 's/^[#[:space:]]*MACs[[:space:]]+.*$/MACs hmac-sha2-512,hmac-sha2-256,hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com/g' \
+        "$ssh_crypto_config"
+    then
+        echo "Updated OpenSSH Ciphers & MACs: $ssh_crypto_config"
+    fi
+else
+   echo "ERROR: file not found $ssh_crypto_config"
+fi
+
+sshserver_crypto_config=/etc/crypto-policies/back-ends/opensshserver.config
+if [[ -f $sshserver_crypto_config ]]; then
+    cp "$sshserver_crypto_config" "${sshserver_crypto_config}.bak"
+
+    if sed -E -i \
+      -e 's/-oCiphers=[[:graph:]]+/-oCiphers=aes256-ctr,aes192-ctr,aes128-ctr,aes256-gcm@openssh.com,aes128-gcm@openssh.com/g' \
+      -e 's/-oMACS=[[:graph:]]+/-oMACS=hmac-sha2-512,hmac-sha2-256,hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com/g' \
+      "$sshserver_crypto_config"
+    then
+      echo "Updated OpenSSH Server Ciphers & MACs: $sshserver_crypto_config"
+   fi
+else
+   echo "ERROR: file not found $sshserver_crypto_config"
+fi
 %end

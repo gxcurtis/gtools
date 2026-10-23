@@ -5,6 +5,11 @@
       "xlayouts": "us"
    },
    "timezone": "Etc/UTC",
+   "timesource": {
+      "ntp_disable": false,
+      "servers": [],
+      "pools": []
+   },
    "interface_type": "text",
    "system_action": "reboot",
    "eula": "agreed",
@@ -21,7 +26,7 @@
    },
    "network": {
       "bootproto": "static",
-      "hostname": "secure-server.gxcurtis.dev",
+      "hostname": "secure-server",
       "device": "link",
       "activate": true,
       "ipv4": {
@@ -29,7 +34,7 @@
          "address": "192.168.100.2",
          "gateway": "192.168.100.1",
          "netmask": "255.255.255.0",
-         "dns_search": "gxcurtis.dev",
+         "dns_search": "",
          "auto_dns": true
       },
       "ipv6": {
