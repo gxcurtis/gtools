@@ -7,7 +7,7 @@
    "timezone": "Etc/UTC",
    "timesource": {
       "ntp_disable": false,
-      "servers": [],
+      "servers": ["192.168.100.140","192.168.100.150"],
       "pools": []
    },
    "interface_type": "text",
@@ -127,6 +127,7 @@
          "bash-completion",
          "openscap-scanner",
          "scap-security-guide",
+         "authselect",
          "python3",
          "python3-pip",
          "ansible-core",

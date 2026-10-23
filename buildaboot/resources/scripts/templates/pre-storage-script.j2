@@ -26,7 +26,6 @@ fi
 
 emit_lvm() {
 # LVM allocation scheme
-
     if [[ $swap == true ]]; then
         local swap_line="logvol swap --vgname=$vgname --name=swap --fstype=swap --recommended"
     else
