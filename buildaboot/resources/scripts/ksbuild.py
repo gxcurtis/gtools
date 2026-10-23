@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 import json
 import argparse
+from pathlib import Path
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
+
+SCRIPT_DIR = Path(__file__).resolve().parent
 
 def build_parser():
     parser = argparse.ArgumentParser()
@@ -13,9 +16,9 @@ def build_parser():
 
 def build_kickstart(args):
     if args.stig:
-        json_default_file = "json/hardening-kickstart-defaults.json"
+        json_default_file = f"{SCRIPT_DIR}/json/hardening-kickstart-defaults.json"
     else:
-        json_default_file = "json/kickstart-defaults.json"
+        json_default_file = f"{SCRIPT_DIR}/json/kickstart-defaults.json"
 
     with open(json_default_file, "r") as f:
         ks_defaults = json.load(f)
@@ -41,7 +44,7 @@ def render_kickstart(ksdata: dict, outfile: str):
         raise ValueError
 
     env = Environment(
-        loader=FileSystemLoader("templates"),
+        loader=FileSystemLoader(f"{SCRIPT_DIR}/templates"),
         undefined=StrictUndefined,
         keep_trailing_newline=True
     )
