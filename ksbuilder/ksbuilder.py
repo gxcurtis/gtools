@@ -1,14 +1,19 @@
 #!/usr/bin/env python3
-import sys
-import json
 import argparse
+import json
+import re
+import subprocess
+import sys
+from getpass import getpass
+from ipaddress import IPv4Interface
 from pathlib import Path
+
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
 
 # For relative execution
 SCRIPT_DIR = Path(__file__).resolve().parent
 
-# Dictionary of Default Kickstart Values
+# Default Kickstart Values
 kickstart_defaults = {
     "lang": "en_US.UTF-8",
     "keyboard": {
@@ -79,7 +84,7 @@ kickstart_defaults = {
     "selinux": "enforcing",
     "rootpw": {
         "iscrypted": True,
-        "locked": True,
+        "locked": False,
         "password": ""
     },
     "bootloader": {
@@ -153,9 +158,10 @@ kickstart_defaults = {
         "weak_deps": True
     },
     "pre_ks_templates": [],
-    "post_ks_templates": ["default-post-ks.j2"]
+    "post_ks_templates": []
 }
 
+# STIG Defaults, using 192.168.100.0/24 as placeholders
 stig_defaults = {
     "timesource": {
         "servers": ["192.168.100.140","192.168.100.150"]
@@ -221,16 +227,63 @@ stig_defaults = {
 
 def build_parser():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-o", "--outfile", dest="outfile", type=str, help="Output file path")
-    parser.add_argument("json_file", nargs="?", type=Path, help="Path to JSON file for inputs")
+    parser.add_argument("json_file", nargs="?", type=argparse.FileType("r"), default=None, help="Json file or '-' to read from stdin")
+    parser.add_argument("-o", "--output", dest="outfile", type=str, help="Output file path")
     parser.add_argument("-s", "--stig", action="store_true", help="Use defaults with additional STIG inputs")
-    parser.add_argument("-l", "--list-defaults", nargs="*", choices=kickstart_defaults.keys(), metavar="KEY", help="Print defaults for specifed sections, or all sections if omitted")
-    parser.add_argument("--hostname", type=str, help="Set hostname") 
-    parser.add_argument("--ip", type=str, help="Set IPv4 address") 
+    parser.add_argument("-l", "--list-defaults", nargs="*", choices=kickstart_defaults.keys(), metavar="KEY", help="Print defaults for specifed parameters, or all parameters if omitted")
+    parser.add_argument("--hostname", type=str, help="Set hostname")
+    parser.add_argument("--ip", type=str, help="Set IPv4 address in CIDR notation e.g. 192.168.100.2/24")
+    parser.add_argument("--gateway", type=str, help="Set IPv4 gateway")
+    parser.add_argument("--timezone", type=str, help="Set timezone")
+    parser.add_argument("--root-password", nargs="?", const=True, metavar="ROOT_PASSWORD_HASH", help="Encrypted ROOT password hash or leave blank to be prompted")
+    parser.add_argument("--grub-password", nargs="?", const=True, metavar="GRUB_PASSWORD_HASH", help="Encrypted GRUB password hash or leave blank to be prompted")
+    parser.add_argument("--luks-password", nargs="?", const=True, help="Plaintext LUKS password or leave blank to be prompted")
+    parser.add_argument("--user-passwords", action="store_true", help="Prompt for users defined in kickstat")
 
-    args = parser.parse_args()
+    try:
+        import argcomplete
+        argcomplete.autocomplete(parser)
+    except:
+        pass
 
-    return args
+    return parser.parse_args()
+
+def prompt_password(account):
+    attempts = 0
+    while True:
+        if attempts >= 3:
+            print("Too many failed attempts. Exiting...")
+            sys.exit(1)
+        first_input = getpass(f"Enter password for {account}: ")
+        second_input = getpass(f"Confirm {account} password: ")
+        if first_input == second_input:
+            password = first_input
+            print()
+            return password
+        else:
+            print("Passwords do not match! Try again...", end="\n\n")
+            attempts += 1
+        
+def hash_password(password, grub=False):
+    password = password.strip()
+
+    if grub:
+        command = ["grub2-mkpasswd-pbkdf2"]
+        result = subprocess.run(command, input=f"{password}\n{password}\n", capture_output=True, text=True, check=True)
+        match = re.search(r"grub\.pbkdf2\.sha512\.\d+\.[0-9A-Fa-f]+\.[0-9A-Fa-f]+", result.stdout)
+        hashed_password = match.group()
+    else:
+        command = ["openssl", "passwd", "-6", "-stdin"]
+        result = subprocess.run(command, input=password, capture_output=True, text=True, check=True)
+        hashed_password = result.stdout
+    
+    return hashed_password.strip()
+
+def parse_cidr_ip(cidr_ip):
+    cidr_ip = cidr_ip.strip()
+    interface = IPv4Interface(cidr_ip)
+
+    return str(interface.ip), str(interface.netmask)
 
 def list_default_parameters(requested_defaults: list, ksdefaults: dict):
     keys = requested_defaults or ksdefaults.keys()
@@ -282,6 +335,9 @@ if __name__ == '__main__':
         with open(args.json_file, "r") as f:
             inputs = json.load(f)     
         ksdata = merge_kickstart_data(inputs, defaults)
+    elif not sys.stdin.isatty():
+        inputs = json.load(sys.stdin)
+        ksdata = merge_kickstart_data(inputs, defaults)
     else:
         ksdata = defaults
 
@@ -289,7 +345,48 @@ if __name__ == '__main__':
         ksdata["network"]["hostname"] = args.hostname
         
     if args.ip is not None:
-        ksdata["network"]["ipv4"]["address"] = args.ip
+        ip, netmask = parse_cidr_ip(args.ip)
+        ksdata["network"]["ipv4"]["address"] = ip
+        ksdata["network"]["ipv4"]["netmask"] = netmask
+
+    if args.gateway is not None:
+        ksdata["network"]["gateway"] = args.gateway
+
+    if args.timezone is not None:
+        ksdata["timezone"] = args.timezone
+        
+    if args.root_password is not None:
+        if args.root_password is True:
+        # No value given so prompt and hash
+            rootpw = prompt_password("root")
+            rootpw = hash_password(rootpw)
+        else:
+            rootpw = args.root_password
+
+        ksdata["rootpw"]["password"] = rootpw
+
+    if args.grub_password is not None:
+        if args.grub_password is True:
+        # No value given so prompt and hash
+            grubpw = prompt_password("grub")
+            grubpw = hash_password(grubpw, grub=True)
+        else:
+            grubpw = args.grub_password
+        ksdata["bootloader"]["password"] = grubpw
+
+    if args.luks_password is not None:
+        if args.luks_password is True:
+            lukspw = prompt_password("luks")
+        else:
+            lukspw = args.luks_password
+        ksdata["partition"]["crypt_passphrase"] = lukspw
+
+    if args.user_passwords:
+        for i, user in enumerate(ksdata["users"]):
+            if not user["password"]:
+                userpw = prompt_password(user["name"])
+                userpw = hash_password(userpw)
+                ksdata["users"][i]["password"] = userpw
 
     render_kickstart(ksdata, outfile=args.outfile)
 

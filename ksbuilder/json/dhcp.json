@@ -1,0 +1,20 @@
+{
+   "timezone": "<TIMEZONE>",
+   "network": {
+      "bootproto": "dhcp",
+      "hostname": "<HOSTNAME>"
+   },
+   "rootpw": {
+      "iscrypted": true,
+      "password": "<PASSWORD-HASH>"
+   },
+   "users": [
+      {
+         "name": "ansible",
+         "iscrypted": true,
+         "password": "<PASSWORD-HASH>",
+         "groups": ["wheel"],
+         "sshkey": ""
+      }  
+   ]
+}

@@ -1,0 +1,25 @@
+{
+   "timezone": "<TIMEZONE>",
+   "network": {
+      "bootproto": "static",
+      "hostname": "<HOSTNAME>",
+      "ipv4": {
+         "address": "<X.X.X.X>",
+         "gateway": "<X.X.X.X>",
+         "netmask": "<255.255.X.X>"
+      }
+   },
+   "rootpw": {
+      "iscrypted": true,
+      "password": "<PASSWORD-HASH>"
+   },
+   "users": [
+      {
+         "name": "ansible",
+         "iscrypted": true,
+         "password": "<PASSWORD-HASH>",
+         "groups": ["wheel"],
+         "sshkey": ""
+      }  
+   ]
+}
