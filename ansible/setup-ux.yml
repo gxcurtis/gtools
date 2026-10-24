@@ -90,6 +90,42 @@
           remote_src: true
         notify: Refresh font cache
 
+    - name: Create user dot bin directory
+      file:
+        state: directory
+        path: "{{ u.home }}/.local/bin"
+
+    - name: Symlink project tools to user dot bin directory
+      file:
+        src: "{{ item | realpath }}"
+        dest: "{{ u.home }}/.local/bin/{{ item | basename | splitext | first }}"
+        state: link
+      loop:
+        - "{{ playbook_dir }}/../ksbuilder/ksbuilder.py"
+        - "{{ playbook_dir }}/../buildaboot/build-bootdev.sh"
+        - "{{ playbook_dir }}/../setup-ux.sh"
+
+
+    - name: Create user bash completions directory
+      file:
+        state: directory
+        path: "{{ u.home }}/.local/share/bash-completion/completions"
+
+    - name: Generate Python completion scripts
+      ansible.builtin.command:
+        cmd: "register-python-argcomplete {{ item }}"
+      register: argcomplete_scripts
+      changed_when: false
+      loop:
+        - ksbuilder
+
+    - name: Install Python completion scripts
+      ansible.builtin.copy:
+        content: "{{ item.stdout }}\n"
+        dest: "{{ u.home }}/.local/share/bash-completion/completions/{{ item.item }}"
+      loop: "{{ argcomplete_scripts.results }}" 
+      no_log: true
+
   handlers:
     - name: Merge xrdb
       command: xrdb -merge {{ u.home }}/.Xresources 

@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
+SCRIPT_DIR="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")"
 
-cd "$(dirname -- "${BASH_SOURCE[0]}")" || exit 1
+cd "$SCRIPT_DIR" || exit 1
 
 if command -v ansible-playbook > /dev/null; then
   APB='ansible-playbook'
