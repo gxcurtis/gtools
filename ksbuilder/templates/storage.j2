@@ -1,0 +1,168 @@
+%pre --interpreter=/usr/bin/bash --log=/tmp/pre-kickstart.log --erroronfail
+
+partfile="{{ storage.includefile }}"
+ignore_label=INSTALL
+vgname={{ storage.lvm.vgname }}
+
+# Sizes in MiB
+bootefi_size={{ storage.boot_efi_size }}
+boot_size={{ storage.boot_size }}
+
+# Min/Max disk size in bytes
+{%- if storage.configuration == 'auto' %}
+MIN_SIZE=0
+(( MAX_SIZE = {{ storage.max_size * 1024 ** 2 }} )) # {{ storage.max_size // 1024 }} G
+{% else %}
+(( MIN_SIZE = {{ storage.min_size * 1024 ** 2 }} )) # {{ storage.min_size // 1024 }} G
+(( MAX_SIZE = {{ storage.max_size * 1024 ** 2 }} )) # {{ storage.max_size // 1024 }} G
+{% for lv in storage.lvm.logvols %}
+lv_{{ lv.name }}=("{{ lv.mount }}" "{{ lv.name }}" "{{ lv.fstype }}" {{ lv.size }})
+{%- endfor %}
+
+# Array of logical volume arrays
+LOGVOLS=({%- for lv in storage.lvm.logvols %}{{- 'lv_' if loop.first else '  lv_'}}{{ lv.name }}{% endfor %})
+{% endif %}
+{%- if storage.configuration != 'auto' %}
+# Output logical volumes defined in LOGVOLS
+emit_lvm() {
+  {%- if storage.growth_percent %}
+  # Grow LVM storage up to {{ storage.growth_percent }}% storage capacity
+  local disk_size="$1"
+  local percent={{ storage.growth_percent }}
+  local (( percent_size = disk_size * percent / 100 ))
+  local (( scale_factor = percent_size / MIN_SIZE ))
+  {% endif %}
+printf '%s\n' "volgroup $vgname pv.01"
+
+for logvol in "${LOGVOLS[@]}"; do
+  local -n lv="$logvol"
+
+  # Scale up logical volume by calculated factor (lv[3] = size)
+  test (( scale_factor > 1 )) && (( lv[3] = scale_factor * lv[3] ))
+
+  printf 'logvol %s --vgname=%s --name=%s --fstype=%s --size=%s\n' \
+    "${lv[0]}" \
+    "${vgname}" \
+    "${lv[1]}" \
+    "${lv[2]}" \
+    "${lv[3]}"
+done
+}
+{% endif %}
+{%- if storage.configuration == 'standard' or storage.configuration == 'dynamic' %}
+# Output single disk partition scheme
+emit_single() {
+    test -n "$1" || exit 1
+    local os_disk="$1"
+
+    cat << EOF
+ignoredisk --only-use=$os_disk
+clearpart --all --initlabel --drives=$os_disk
+zerombr
+
+part /boot/efi --fstype=efi --size=$bootefi_size --ondisk=$os_disk
+part /boot --fstype=xfs --size=$boot_size --ondisk=$os_disk
+part pv.01 --fstype=lvmpv --size=1 --grow --ondisk=$os_disk{% if storage.luks_passphrase %} --encrypted --passphrase={{ storage.luks_passphrase }}{% endif %}
+
+EOF
+}
+{% endif %}
+{%- if storage.configuration == 'raid1' or storage.configuration == 'dynamic' %}
+# Output double disk raid 1 partition scheme
+emit_raid1() {
+    test -n "$1" || exit 1
+    test -n "$2" || exit 2
+    local os_disk1="$1"
+    local os_disk2="$2"
+
+    cat << EOF
+ignoredisk --only-use=$os_disk1,$os_disk2
+clearpart --all --initlabel --drives=$os_disk1,$os_disk2
+zerombr
+
+part raid.01 --size=$bootefi_size --ondisk=$os_disk1
+part raid.02 --size=$bootefi_size --ondisk=$os_disk2
+raid /boot/efi --device=md0 --level=1 --fstype=efi raid.01 raid.02
+
+part raid.11 --size=$boot_size --ondisk=$os_disk1
+part raid.12 --size=$boot_size --ondisk=$os_disk2
+raid /boot --device=md1 --level=1 --fstype=xfs raid.11 raid.12
+
+part raid.21 --size=1 --grow --ondisk=$os_disk1
+part raid.22 --size=1 --grow --ondisk=$os_disk2
+raid pv.01 --device=md2 --level=1 --fstype=lvmpv raid.21 raid.22{% if storage.luks_passphrase %} --encrypted --passphrase={{ storage.luks_passphrase }}{% endif %}
+
+EOF
+}
+{% endif %}
+# Get install disk by label to ignore it
+get_install_disk() {
+    local device parent
+    device="$(readlink -f /dev/disk/by-label/"$ignore_label")" || return 1
+    parent="$(lsblk -no PKNAME "$device")" || return 1
+
+    if [[ -n "$parent" ]]; then
+        device="$parent"
+    else
+        device="${device##*/}"
+    fi
+
+    printf '%s' "$device" 
+}
+
+install_disk="$(get_install_disk)"
+filtered_disks=()
+smallest_disk=''
+smallest_disk_size=0
+
+# Filter for qualified disks
+while read -r name size removable; do
+    [[ "$install_disk" != "$name" ]] || continue
+    ((removable == 0)) || continue
+    [[ "$name" =~ ^(vd|sd|nvme) ]] || continue
+    (( MIN_SIZE <= size && size <= MAX_SIZE )) || continue
+
+    if (( smallest_disk_size == 0 || size < smallest_disk_size )); then
+    # Set initial smallest disk
+        smallest_disk="$name"
+        smallest_disk_size="$size"
+        filtered_disks=("$smallest_disk")
+    elif (( smallest_disk_size == size )); then
+        filtered_disks+=("$name")
+    else
+        continue
+    fi
+done < <(lsblk -ndbo NAME,SIZE,RM)
+
+{% raw -%}
+num_disks="${#filtered_disks[@]}"
+{% endraw %}
+if [[ $num_disks -lt 1 ]]; then
+    printf 'ERROR: NO DISKS FOUND!\n'
+    exit 1
+{%- if storage.configuration == 'standard' %}
+else
+    emit_single "${filtered_disks[0]}" > "$partfile"
+fi
+{%- elif storage.configuration == 'raid1' %}
+else
+    emit_raid1 "${filtered_disks[0]}" "${filtered_disks[1]}" > "$partfile"
+fi
+{%- elif storage.configuration == 'dynamic' %}
+elif [[ $num_disks -eq 1 ]]; then
+    emit_single "${filtered_disks[0]}" > "$partfile"
+else
+    emit_raid1 "${filtered_disks[0]}" "${filtered_disks[1]}" > "$partfile"
+fi
+
+emit_lvm "$smallest_disk_size" >> "$partfile"
+{%- else %}
+else
+  zerombr
+  ignoredisk --only-use="${filtered_disks[0]}"
+  clearpart --all --initlabel --drives="${filtered_disks[0]}"
+  autopart
+fi
+{%- endif %}
+
+%end

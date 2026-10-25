@@ -1,0 +1,77 @@
+{
+   "storage": {
+      "_choices_": [
+         "auto",
+         "standard",
+         "standard_raid1",
+         "standard_dynamic"
+      ],
+      "configuration": "standard_dynamic",
+      "template": "storage.j2",
+      "includefile": "/tmp/part-include",
+      "crypt_passphrase": "",
+      "boot_efi_size": 600,
+      "boot_size": 1024,
+      "lvm": {
+         "vgname": "os",
+         "swap": true,
+         "default_lvsize": 2048,
+         "logvols": [
+            {
+               "mount": "/",
+               "name": "root",
+               "size": 0,
+               "fstype": ""
+            },
+            {
+               "mount": "/home",
+               "name": "",
+               "size": 0,
+               "fstype": ""
+            },
+            {
+               "mount": "/scratch",
+               "name": "scratch",
+               "size": 0,
+               "fstype": ""
+            },
+            {
+               "mount": "/tmp",
+               "name": "tmp",
+               "size": 0,
+               "fstype": ""
+            },
+            {
+               "mount": "/var",
+               "name": "var",
+               "size": 0,
+               "fstype": ""
+            },
+            {
+               "mount": "/var/tmp",
+               "name": "vartmp",
+               "size": 0,
+               "fstype": ""
+            },
+            {
+               "mount": "/var/log",
+               "name": "varlog",
+               "size": 0,
+               "fstype": ""
+            },
+            {
+               "mount": "/var/log/journal",
+               "name": "journal",
+               "size": 0,
+               "fstype": ""
+            },
+            {
+               "mount": "/var/log/audit",
+               "name": "audit",
+               "size": 0,
+               "fstype": ""
+            }
+         ]
+      }
+   }
+}

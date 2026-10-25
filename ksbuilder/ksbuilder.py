@@ -12,229 +12,18 @@ from jinja2 import Environment, FileSystemLoader, StrictUndefined
 
 # For relative execution
 SCRIPT_DIR = Path(__file__).resolve().parent
-
-# Default Kickstart Values
-kickstart_defaults = {
-    "lang": "en_US.UTF-8",
-    "keyboard": {
-        "vckeymap": "us",
-        "xlayouts": "us"
-    },
-    "timezone": "Etc/UTC",
-    "timesource": {
-        "ntp_disable": False,
-        "servers": [],
-        "pools": []
-    },
-    "interface_type": "text",
-    "system_action": "reboot",
-    "eula": "agreed",
-    "firstboot": "disable",
-    "firewall": {
-        "enabled": True,
-        "system_defaults": True,
-        "ssh": True,
-        "http": False,
-        "ftp": False,
-        "smtp": False,
-        "ports": [],
-        "services": []
-    },
-    "network": {
-        "bootproto": "dhcp",
-        "hostname": "",
-        "device": "link",
-        "activate": True,
-        "ipv4": {
-            "enabled": True,
-            "address": "",
-            "gateway": "",
-            "netmask": "",
-            "dns_search": "",
-            "auto_dns": True
-        },
-        "ipv6": {
-            "enabled": True,
-            "address": "",
-            "gateway": "",
-            "dns_search": "",
-            "auto_dns": True
-        },
-        "no_defroute": False,
-        "no_dns": False,
-        "nameservers": [],
-        "mtu": 1500,
-        "bond": {
-            "slaves": [],
-            "opts": []
-        },
-        "vlan": {
-            "id": 0,
-            "interface_name": ""
-        },
-        "bridge": {
-            "slaves": [],
-            "opts": []
-        }
-    },
-    "logging": {
-        "host": "",
-        "port": ""
-    },
-    "selinux": "enforcing",
-    "rootpw": {
-        "iscrypted": True,
-        "locked": False,
-        "password": ""
-    },
-    "bootloader": {
-        "location": "mbr",        
-        "args": [
-            "console=tty0",
-            "console=ttyS0,115200n8"
-        ],
-        "iscrypted": True,
-        "password": "",
-        "superuser": "root"
-    },
-    "users": [
-        {
-            "name": "ansible",
-            "password": "",
-            "iscrypted": True,
-            "homedir": "/home/ansible",
-            "shell": "/bin/bash",
-            "gecos": "Ansible Admin",
-            "groups": ["wheel"],
-            "sshkey": ""
-       }  
-    ],
-    "groups": [],
-    "services": {
-        "enabled": ["sshd"],
-        "disabled": []
-    },
-    "partition": {
-        "template": "pre-storage-script.j2",
-        "tmpfile": "/tmp/part-include",
-        "vgname": "os",
-        "swap": True,
-        "crypt_passphrase": ""
-    },
-    "openscap": {
-        "hardening": False,
-        "content_type": "scap-security-guide",
-        "profile": "xccdf_org.ssgproject.content_profile_stig"
-    },
-    "packages": {
-        "list": [
-            "@core",
-            "git",
-            "curl",
-            "tmux",
-            "rsync",
-            "chrony",
-            "openssl",
-            "tcpdump",
-            "nmap-ncat",
-            "vim-enhanced",
-            "bash-completion",
-            "openscap-scanner",
-            "scap-security-guide",
-            "authselect",
-            "python3",
-            "python3-pip",
-            "ansible-core",
-            "policycoreutils-python-utils",
-            "bind-utils",
-            "yum-utils",
-            "nfs-utils",
-            "info",
-            "man-db",
-            "man-pages"
-        ],
-        "ignore_missing": True,
-        "ignore_broken": False,
-        "weak_deps": True
-    },
-    "pre_ks_templates": [],
-    "post_ks_templates": []
-}
-
-# STIG Defaults, using 192.168.100.0/24 as placeholders
-stig_defaults = {
-    "timesource": {
-        "servers": ["192.168.100.140","192.168.100.150"]
-    },
-    "firewall": {
-        "system_defaults": False
-    },
-    "network": {
-        "bootproto": "static",
-        "hostname": "secure-server",
-        "ipv4": {
-            "address": "192.168.100.2",
-            "gateway": "192.168.100.1",
-            "netmask": "255.255.255.0"
-        },
-        "ipv6": {
-            "enabled": False
-        },
-        "nameservers": [
-            "192.168.100.110",
-            "192.168.100.120"
-        ]
-    },
-    "logging": {
-        "host": "192.168.100.130"
-    },
-    "selinux": "enforcing",
-    "rootpw": {
-        "locked": True,
-        "password": "$6$.SS2UVORxKkqgCio$Qq4lcZ12NuM8KyvBxo2J3a2xATCuB4t4V57ncBet.QModGGAkE1MacUR5t6M4XK1a2fKghPJPJh/OOEboh9uL."
-    },
-    "bootloader": {
-        "args": [
-             "console=tty0",
-             "console=ttyS0,115200n8",
-             "audit=1",
-             "audit_backlog_limit=8192",
-             "fips=1"
-        ],
-        "password": "grub.pbkdf2.sha512.10000.3AA73CFC245DFD2C0B8E10840D278084F66440AB0EE4E94D6D314BACD5F1387ED1BA1BF05B805ADE228CF08AAFE031E016CFC92D23F4A370CCE3D36DC184F61D.CB376E8D7AFF39EF47A9CDE03834EFE4538F5948662F0A8F9CAE17D234176F1B7524F957EB61A0EA6B6982285E1D7C29C38EF1CA78855AC31D90BDDF4495959A",
-        "superuser": "bootadmin"
-    },
-    "users": [
-        {
-            "name": "ansible",
-            "password": "$6$9IEt/2bU694XYO9.$QPnCJgSg/52ToX7C0/hcQ/9dCVVzKSB4VCLZJSGswv.JHh6udUXf1r.QRFgCSzyTWGHirvab4QeWCZUjQNAJw1",
-            "iscrypted": True,
-            "gecos": "Ansible Admin",
-            "groups": ["wheel"],
-            "sshkey": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFpAKkLrA1BNUJGSfGtbLr6YsC0FpXttI3dB5M25JJla"
-        }
-    ],
-    "partition": {
-        "crypt_passphrase": "install"
-    },
-    "openscap": {
-        "hardening": True,
-        "content_type": "scap-security-guide",
-        "profile": "xccdf_org.ssgproject.content_profile_stig"
-    },
-    "post_ks_templates": ["post-hardening-script.j2"]
-} 
-
 def build_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument("json_file", nargs="?", type=argparse.FileType("r"), default=None, help="Json file or '-' to read from stdin")
     parser.add_argument("-o", "--output", dest="outfile", type=str, help="Output file path")
-    parser.add_argument("-s", "--stig", action="store_true", help="Use defaults with additional STIG inputs")
     parser.add_argument("-l", "--list-defaults", nargs="*", choices=kickstart_defaults.keys(), metavar="KEY", help="Print defaults for specifed parameters, or all parameters if omitted")
+    parser.add_argument("--stig", action="store_true", help="Use defaults with additional STIG inputs")
+    parser.add_argument("--storage", choices=["auto","standard","raid1","dynamic"], default="dynamic", help="Specify a storage configuration strategy")
     parser.add_argument("--hostname", type=str, help="Set hostname")
-    parser.add_argument("--ip", type=str, help="Set IPv4 address in CIDR notation e.g. 192.168.100.2/24")
+    parser.add_argument("--ip", type=str, help="Set IPv4 address in CIDR notation")
     parser.add_argument("--gateway", type=str, help="Set IPv4 gateway")
     parser.add_argument("--timezone", type=str, help="Set timezone")
+    parser.add_argument("--packages", nargs='*', type=str,  help="Specify packages to add")
     parser.add_argument("--root-password", nargs="?", const=True, metavar="ROOT_PASSWORD_HASH", help="Encrypted ROOT password hash or leave blank to be prompted")
     parser.add_argument("--grub-password", nargs="?", const=True, metavar="GRUB_PASSWORD_HASH", help="Encrypted GRUB password hash or leave blank to be prompted")
     parser.add_argument("--luks-password", nargs="?", const=True, help="Plaintext LUKS password or leave blank to be prompted")
@@ -319,6 +108,294 @@ def render_kickstart(ksdata: dict, outfile=None):
         with open(outfile, "w") as f:
             f.write(rendered_kickstart)
 
+def calc_min_storage(storage: dict):
+    min_storage = storage["boot_size"] + storage["boot_efi_size"]
+
+    for lv in storage["lvm"]["logvols"]:
+        min_storage += lv["size"]
+    
+    return min_storage
+
+# Default Kickstart Values
+kickstart_defaults = {
+    "lang": "en_US.UTF-8",
+    "keyboard": {
+        "vckeymap": "us",
+        "xlayouts": "us"
+    },
+    "timezone": "Etc/UTC",
+    "timesource": {
+        "ntp_disable": False,
+        "servers": [],
+        "pools": []
+    },
+    "interface_type": "text",
+    "system_action": "reboot",
+    "eula": "agreed",
+    "firstboot": "disable",
+    "firewall": {
+        "enabled": True,
+        "system_defaults": True,
+        "ssh": True,
+        "http": False,
+        "ftp": False,
+        "smtp": False,
+        "ports": [],
+        "services": []
+    },
+    "network": {
+        "bootproto": "dhcp",
+        "hostname": "",
+        "device": "link",
+        "activate": True,
+        "ipv4": {
+            "enabled": True,
+            "address": "",
+            "gateway": "",
+            "netmask": "",
+            "dns_search": "",
+            "auto_dns": True
+        },
+        "ipv6": {
+            "enabled": True,
+            "address": "",
+            "gateway": "",
+            "dns_search": "",
+            "auto_dns": True
+        },
+        "no_defroute": False,
+        "no_dns": False,
+        "nameservers": [],
+        "mtu": 1500,
+        "bond": {
+            "slaves": [],
+            "opts": []
+        },
+        "vlan": {
+            "id": 0,
+            "interface_name": ""
+        },
+        "bridge": {
+            "slaves": [],
+            "opts": []
+        }
+    },
+    "logging": {
+        "host": "",
+        "port": ""
+    },
+    "selinux": "enforcing",
+    "rootpw": {
+        "iscrypted": True,
+        "locked": False,
+        "password": hash_password("changeme")
+    },
+    "bootloader": {
+        "location": "mbr",        
+        "args": [
+            "console=tty0",
+            "console=ttyS0,115200n8"
+        ],
+        "iscrypted": True,
+        "password": "",
+        "superuser": "root"
+    },
+    "users": [
+        {
+            "name": "ansible",
+            "password": hash_password("changeme"),
+            "iscrypted": True,
+            "homedir": "/home/ansible",
+            "shell": "/bin/bash",
+            "gecos": "Ansible Admin",
+            "groups": ["wheel"],
+            "sshkey": ""
+       }  
+    ],
+    "groups": [],
+    "services": {
+        "enabled": ["sshd"],
+        "disabled": []
+    },
+    "storage": {
+        "configuration": "dynamic",
+        "template": "storage.j2",
+        "includefile": "/tmp/part-include",
+        "luks_passphrase": "",
+        "boot_efi_size": 600,
+        "boot_size": 1024,
+        "min_size": 0,
+        "max_size": 2 * pow(1024, 2),
+        "growth_percent": 80,
+        "lvm": {
+            "vgname": "os",
+            "logvols": [
+                {
+                    "mount": "/",
+                    "name": "root",
+                    "size": 20480,
+                    "fstype": "xfs"
+                },
+                {
+                    "mount": "/home",
+                    "name": "home",
+                    "size": 10240,
+                    "fstype": "xfs"
+                },
+                {
+                    "mount": "/scratch",
+                    "name": "scratch",
+                    "size": 2048,
+                    "fstype": "xfs"
+                },
+                {
+                    "mount": "/tmp",
+                    "name": "tmp",
+                    "size": 2048,
+                    "fstype": "xfs"
+                },
+                {
+                    "mount": "/var",
+                    "name": "var",
+                    "size": 2048,
+                    "fstype": "xfs"
+                },
+                {
+                    "mount": "/var/tmp",
+                    "name": "vartmp",
+                    "size": 2048,
+                    "fstype": "xfs"
+                },
+                {
+                    "mount": "/var/log",
+                    "name": "varlog",
+                    "size": 2048,
+                    "fstype": "xfs"
+                },
+                {
+                    "mount": "/var/log/journal",
+                    "name": "journal",
+                    "size": 2048,
+                    "fstype": "xfs"
+                },
+                {
+                    "mount": "/var/log/audit",
+                    "name": "audit",
+                    "size": 2048,
+                    "fstype": "xfs"
+                },
+                {
+                    "mount": "none",
+                    "name": "swap",
+                    "size": 4096,
+                    "fstype": "swap"
+                }
+            ]
+        }
+    },
+    "openscap": {
+        "hardening": False,
+        "content_type": "scap-security-guide",
+        "profile": "xccdf_org.ssgproject.content_profile_stig"
+    },
+    "software": {
+        "ignore_missing": True,
+        "ignore_broken": False,
+        "weak_deps": True,
+        "repos": [
+            {
+            "name": "",
+            "baseurl": "",
+            "install": True
+            }
+        ],
+        "core_packages": [
+            "@core",
+            "curl",
+            "tmux",
+            "rsync",
+            "openssl",
+            "vim-enhanced",
+            "bash-completion",
+            "info",
+            "man-db",
+            "man-pages"
+        ],
+        "packages": [
+            "git",
+            "tcpdump",
+            "nmap-ncat",
+            "bind-utils",
+            "nfs-utils",
+            "python3",
+            "python3-pip",
+            "ansible-core",
+            "openscap-scanner",
+            "scap-security-guide",
+            "policycoreutils-python-utils",
+        ]
+    },
+    "pre_ks_templates": [],
+    "post_ks_templates": ["post.j2"]
+}
+
+stig_defaults = {
+    "timesource": {
+        "servers": ["time.nist.gov"]
+    },
+    "firewall": {
+        "system_defaults": False,
+        "ssh": True
+    },
+    "network": {
+        "ipv4": {
+            "auto_dns": False
+        },
+        "ipv6": {
+            "enabled": False,
+            "auto_dns": False
+        },
+        "nameservers": [
+            "9.9.9.9",
+            "8.8.8.8",
+            "1.1.1.1"
+        ]
+    },
+    "selinux": "enforcing",
+    "rootpw": {
+        "locked": True,
+    },
+    "bootloader": {
+        "args": [
+             "console=tty0",
+             "console=ttyS0,115200n8",
+             "audit=1",
+             "audit_backlog_limit=8192",
+             "fips=1"
+        ],
+        "password": hash_password("changeme", grub=True),
+        "superuser": "bootadmin"
+    },
+    "software": {
+        "packages": [
+            "ansible-core",
+            "openscap-scanner",
+            "scap-security-guide",
+            "policycoreutils-python-utils",
+        ]    
+    },
+    "storage": {
+        "luks_passphrase": "changeme"
+    },
+    "openscap": {
+        "hardening": True,
+        "content_type": "scap-security-guide",
+        "profile": "xccdf_org.ssgproject.content_profile_stig"
+    },
+    "post_ks_templates": ["post-hardening.j2"]
+} 
+
+### Main ###
 if __name__ == '__main__':
     args = build_parser()
 
@@ -341,6 +418,12 @@ if __name__ == '__main__':
     else:
         ksdata = defaults
 
+    ### Set calculated minimum disk size 
+    ksdata["storage"]["min_size"] = calc_min_storage(ksdata["storage"])
+
+    if args.storage is not None:
+        ksdata["storage"]["configuration"] = args.storage
+
     if args.hostname is not None:
         ksdata["network"]["hostname"] = args.hostname
         
@@ -357,7 +440,6 @@ if __name__ == '__main__':
         
     if args.root_password is not None:
         if args.root_password is True:
-        # No value given so prompt and hash
             rootpw = prompt_password("root")
             rootpw = hash_password(rootpw)
         else:
@@ -367,7 +449,6 @@ if __name__ == '__main__':
 
     if args.grub_password is not None:
         if args.grub_password is True:
-        # No value given so prompt and hash
             grubpw = prompt_password("grub")
             grubpw = hash_password(grubpw, grub=True)
         else:
@@ -379,7 +460,7 @@ if __name__ == '__main__':
             lukspw = prompt_password("luks")
         else:
             lukspw = args.luks_password
-        ksdata["partition"]["crypt_passphrase"] = lukspw
+        ksdata["partition"]["luks_passphrase"] = lukspw
 
     if args.user_passwords:
         for i, user in enumerate(ksdata["users"]):
@@ -387,6 +468,9 @@ if __name__ == '__main__':
                 userpw = prompt_password(user["name"])
                 userpw = hash_password(userpw)
                 ksdata["users"][i]["password"] = userpw
+
+    if args.packages is not None:
+        ksdata["software"]["packages"] = args.packages
 
     render_kickstart(ksdata, outfile=args.outfile)
 

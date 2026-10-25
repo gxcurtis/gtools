@@ -1,6 +1,7 @@
 %post --interpreter=/usr/bin/bash --log=/root/post-kickstart.log
 
 {%- if bootloader.superuser != 'root' %}
+# Reconfigure grub bootloader user from default 'root' per DISA STIG
 sed -i \
     -e 's/set superusers="root"/set superusers="{{ bootloader.superuser }}"/' \
     -e 's/password_pbkdf2 root /password_pbkdf2 {{ bootloader.superuser }} /' \
@@ -11,5 +12,4 @@ if [ -d /sys/firmware/efi ]; then
 else
     grub2-mkconfig -o /etc/grub2.cfg
 fi
-{%- endif %}
-%end
+{% endif %}

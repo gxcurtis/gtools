@@ -17,7 +17,7 @@ done
 
 firewall-offline-cmd --set-default-zone="$target_zone"
 {%- endif %}
-{%- if bootloader.superuser != 'root' %}
+{% if bootloader.superuser != 'root' %}
 # Reconfigure grub bootloader user from default 'root' per DISA STIG
 sed -i \
     -e 's/set superusers="root"/set superusers="{{ bootloader.superuser }}"/' \

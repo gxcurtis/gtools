@@ -19,6 +19,12 @@ timesource --ntp-pool={{ pool }}
 firstboot --{{ firstboot }}
 eula --{{ eula }}
 
+{%- for repo in software.repos %}
+{%- if repo.name and repo.baseurl %}
+repo {{ repo.name }} --baseurl={{ repo.baseurl }} {%- if repo.install %} --install{% endif %}
+{%- endif %}
+{%- endfor %}
+
 network --bootproto={{ network.bootproto }} --device={{ network.device }}
 {%- if network.activate %} --activate{% endif %}
 {%- if network.hostname %} --hostname={{ network.hostname }}{% endif %}
@@ -111,17 +117,9 @@ user --name={{ user.name }}
 {%- if user.sshkey %}sshkey --username={{ user.name }} "{{ user.sshkey }}"{%- endif %}
 {%- endfor %}
 
-%include {{ partition.tmpfile }}
+%include {{ storage.includefile }}
 
-{%- if openscap.hardening %}
-
-%addon org_fedora_oscap
-  content-type = {{ openscap.content_type }}
-  profile = {{ openscap.profile }}
-%end
-{%- endif %}
-
-{% include partition.template -%}
+{% include storage.template -%}
 
 {%- if pre_ks_templates %}
 {%- for template in pre_ks_templates %}
@@ -130,18 +128,25 @@ user --name={{ user.name }}
 {%- endfor %}
 {%- endif %}
 %packages
-{%- if not packages.list %}
- --default 
+{%- if not software.core_packages and not software.packages %} --default 
 {%- else %}
-{%- if packages.ignore_missing %} --ignoremissing{% endif %}
-{%- if not packages.weak_deps %} --exclude-weakdeps{% endif %}
-{%- if packages.ignore_broken %} --ignorebroken{% endif %}
+{%- if software.ignore_missing %} --ignoremissing{% endif %}
+{%- if not software.weak_deps %} --exclude-weakdeps{% endif %}
+{%- if software.ignore_broken %} --ignorebroken{% endif %}
 
-{%- for package in packages.list %}
+{%- for package in (software.core_packages + software.packages) | unique | sort %}
 {{ package }}
 {%- endfor %}
 
 %end
+
+{%- if openscap.hardening %}
+
+%addon org_fedora_oscap
+  content-type = {{ openscap.content_type }}
+  profile = {{ openscap.profile }}
+%end
+{%- endif %}
 
 {% if post_ks_templates %}
 {%- for template in post_ks_templates %}
