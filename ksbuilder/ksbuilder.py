@@ -46,6 +46,8 @@ def build_parser():
     parser.add_argument("--grub-password", nargs="?", const=True, metavar="GRUB_PASSWORD_HASH", help="Encrypted GRUB password hash or leave blank to be prompted")
     parser.add_argument("--luks-password", nargs="?", const=True, help="Plaintext LUKS password or leave blank to be prompted")
     parser.add_argument("--user-passwords", action="store_true", help="Prompt for users defined in kickstat")
+    parser.add_argument("--interface-type", nargs=1, choices=["graphical", "text", "cmdline"], help="Specify interface type during installation")
+    parser.add_argument("--after-install", nargs=1, choices=["reboot", "poweroff", "shutdown", "halt"], help="Specify system action after installion ends")
 
     if validation_available:
         parser.add_argument(
@@ -146,6 +148,18 @@ def calc_min_storage(storage: dict):
     
     return min_storage
 
+def add_stig_defaults(ksdata: dict):
+        ksdata["bootloader"]["args"] += ["fips=1","audit=1","audit_backlog_limit=8192"]
+        ksdata["bootloader"]["superuser"] = "bootadmin"
+        ksdata["bootloader"]["password"] = hash_password("install", grub=True)
+        ksdata["timesource"]["servers"] += ["time.nist.gov"]
+        ksdata["network"]["ipv6"]["enabled"] = False
+        ksdata["network"]["nameservers"] += ["9.9.9.9","8.8.8.8","1.1.1.1"]
+        ksdata["firewall"]["system_defaults"] = False
+        ksdata["storage"]["luks_passphrase"] = "install"
+        ksdata["openscap"]["hardening"] = True
+        ksdata["post_ks_templates"] += ["post-hardening.j2"]
+
 # Default Kickstart Values
 kickstart_defaults = {
     "lang": "en_US.UTF-8",
@@ -160,7 +174,7 @@ kickstart_defaults = {
         "pools": []
     },
     "interface_type": "text",
-    "system_action": "reboot",
+    "after_install": "reboot",
     "eula": "agreed",
     "firstboot": "disable",
     "firewall": {
@@ -366,76 +380,18 @@ kickstart_defaults = {
         ]
     },
     "pre_ks_templates": [],
-    "post_ks_templates": ["post.j2"]
+    "post_ks_templates": []
 }
-
-stig_defaults = {
-    "timesource": {
-        "servers": ["time.nist.gov"]
-    },
-    "firewall": {
-        "system_defaults": False,
-        "ssh": True
-    },
-    "network": {
-        "ipv4": {
-            "auto_dns": False
-        },
-        "ipv6": {
-            "enabled": False,
-            "auto_dns": False
-        },
-        "nameservers": [
-            "9.9.9.9",
-            "8.8.8.8",
-            "1.1.1.1"
-        ]
-    },
-    "selinux": "enforcing",
-    "rootpw": {
-        "locked": True,
-    },
-    "bootloader": {
-        "args": [
-             "console=tty0",
-             "console=ttyS0,115200n8",
-             "audit=1",
-             "audit_backlog_limit=8192",
-             "fips=1"
-        ],
-        "password": hash_password("install", grub=True),
-        "superuser": "bootadmin"
-    },
-    "software": {
-        "packages": [
-            "ansible-core",
-            "openscap-scanner",
-            "scap-security-guide",
-            "policycoreutils-python-utils",
-        ]    
-    },
-    "storage": {
-        "luks_passphrase": "install"
-    },
-    "openscap": {
-        "hardening": True,
-        "content_type": "scap-security-guide",
-        "profile": "xccdf_org.ssgproject.content_profile_stig"
-    },
-    "post_ks_templates": ["post-hardening.j2"]
-} 
 
 ### Main ###
 if __name__ == '__main__':
     args = build_parser()
 
     if args.stig:
-        defaults = merge_kickstart_data(stig_defaults, kickstart_defaults)
-    else:
-        defaults = kickstart_defaults
+        add_stig_defaults(kickstart_defaults)
 
     if args.list_defaults is not None:
-        list_default_parameters(args.list_defaults, defaults)
+        list_default_parameters(args.list_defaults, kickstart_defaults)
         sys.exit(0)
 
     if args.json_file:
@@ -503,6 +459,12 @@ if __name__ == '__main__':
     if args.packages is not None:
         ksdata["software"]["packages"] = args.packages
 
+    if args.interface_type is not None:
+        ksdata["interface_type"] = args.interface_type
+
+    if args.after_install is not None:
+        ksdata["after_install"] = args.after_install
+
     kickstart = render_kickstart_template(ksdata, outfile=args.outfile)
 
     if validation_available:
@@ -530,5 +492,4 @@ if __name__ == '__main__':
 
         if Path(tmp_file).exists():
             Path(tmp_file).unlink()
-
 

@@ -15,7 +15,7 @@ timesource --ntp-pool={{ pool }}
 {%- endif %}
 
 {{ interface_type }}
-{{ system_action }}
+{{ after_install }}
 firstboot --{{ firstboot }}
 eula --{{ eula }}
 {%- for repo in software.repos %}
