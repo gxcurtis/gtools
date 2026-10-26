@@ -38,7 +38,7 @@ for logvol in "${LOGVOLS[@]}"; do
   local -n lv="$logvol"
 
   # Scale up logical volume by calculated factor (lv[3] = size)
-  test (( scale_factor > 1 )) && (( lv[3] = scale_factor * lv[3] ))
+  (( scale_factor > 1 )) && (( lv[3] = scale_factor * lv[3] ))
 
   printf 'logvol %s --vgname=%s --name=%s --fstype=%s --size=%s\n' \
     "${lv[0]}" \
