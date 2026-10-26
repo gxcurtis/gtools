@@ -10,29 +10,57 @@ from pathlib import Path
 
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
 
+try:
+    from pykickstart.parser import KickstartParser
+    from pykickstart.version import makeVersion, versionMap
+    from pykickstart.errors import KickstartError
+
+    kickstart_versions = versionMap.keys() if isinstance(versionMap, dict) else versionMap
+
+    fedora_versions = sorted([vers for vers in kickstart_versions if vers.startswith("F") and not vers.startswith("FC")], reverse=True, key=lambda x: int(x.lstrip("F")))
+
+    rhel_versions = sorted([vers for vers in kickstart_versions if vers.startswith("RHEL")], reverse=True, key=lambda x: int(x.lstrip("RHEL")))
+
+    latest_versions = fedora_versions[:3] + rhel_versions[:3]
+        
+    validation_available = True
+except ImportError:
+    validation_available = False
+
 # For relative execution
 SCRIPT_DIR = Path(__file__).resolve().parent
+
 def build_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument("json_file", nargs="?", type=argparse.FileType("r"), default=None, help="Json file or '-' to read from stdin")
-    parser.add_argument("-o", "--output", dest="outfile", type=str, help="Output file path")
+    parser.add_argument("-o", "--output", dest="outfile", help="Output file path")
     parser.add_argument("-l", "--list-defaults", nargs="*", choices=kickstart_defaults.keys(), metavar="KEY", help="Print defaults for specifed parameters, or all parameters if omitted")
     parser.add_argument("--stig", action="store_true", help="Use defaults with additional STIG inputs")
     parser.add_argument("--storage", choices=["auto","standard","raid1","dynamic"], default="dynamic", help="Specify a storage configuration strategy")
-    parser.add_argument("--hostname", type=str, help="Set hostname")
-    parser.add_argument("--ip", type=str, help="Set IPv4 address in CIDR notation")
-    parser.add_argument("--gateway", type=str, help="Set IPv4 gateway")
-    parser.add_argument("--timezone", type=str, help="Set timezone")
-    parser.add_argument("--packages", nargs='*', type=str,  help="Specify packages to add")
+    parser.add_argument("--hostname", help="Set hostname")
+    parser.add_argument("--ip", help="Set IPv4 address in CIDR notation")
+    parser.add_argument("--gateway", help="Set IPv4 gateway")
+    parser.add_argument("--timezone", help="Set timezone")
+    parser.add_argument("--packages", nargs='*',  help="Specify packages to add")
     parser.add_argument("--root-password", nargs="?", const=True, metavar="ROOT_PASSWORD_HASH", help="Encrypted ROOT password hash or leave blank to be prompted")
     parser.add_argument("--grub-password", nargs="?", const=True, metavar="GRUB_PASSWORD_HASH", help="Encrypted GRUB password hash or leave blank to be prompted")
     parser.add_argument("--luks-password", nargs="?", const=True, help="Plaintext LUKS password or leave blank to be prompted")
     parser.add_argument("--user-passwords", action="store_true", help="Prompt for users defined in kickstat")
 
+    if validation_available:
+        parser.add_argument(
+            "-v",
+            "--validate",
+            dest="versions",
+            nargs="*",
+            choices=kickstart_versions,
+            help="Validate generated kickstart syntax and compatability" 
+        )
+
     try:
         import argcomplete
         argcomplete.autocomplete(parser)
-    except:
+    except ImportError:
         pass
 
     return parser.parse_args()
@@ -91,14 +119,14 @@ def merge_kickstart_data(ksinputs: dict, ksdefaults: dict):
 
     return kickstart_data
             
-def render_kickstart(ksdata: dict, outfile=None):
+def render_kickstart_template(ksdata: dict, outfile=None, template="kickstart.ks.j2"):
     env = Environment(
         loader=FileSystemLoader(f"{SCRIPT_DIR}/templates"),
         undefined=StrictUndefined,
         keep_trailing_newline=True
     )
 
-    template = env.get_template("kickstart.ks.j2")
+    template = env.get_template(template)
     
     rendered_kickstart = template.render(**ksdata)
 
@@ -107,6 +135,8 @@ def render_kickstart(ksdata: dict, outfile=None):
     else:
         with open(outfile, "w") as f:
             f.write(rendered_kickstart)
+
+    return rendered_kickstart
 
 def calc_min_storage(storage: dict):
     min_storage = storage["boot_size"] + storage["boot_efi_size"]
@@ -473,5 +503,32 @@ if __name__ == '__main__':
     if args.packages is not None:
         ksdata["software"]["packages"] = args.packages
 
-    render_kickstart(ksdata, outfile=args.outfile)
+    kickstart = render_kickstart_template(ksdata, outfile=args.outfile)
+
+    if validation_available:
+        if args.versions is not None and args.versions != []:
+            versions = args.versions
+        else:
+            versions = latest_versions
+
+        try:
+            tmp_file = ksdata["storage"]["includefile"]
+
+            render_kickstart_template(ksdata, outfile=tmp_file, template="storage.j2")
+
+            print()
+            print("Validation Summary")
+            print("------------------")
+            for version in versions:
+                ksparser = KickstartParser(makeVersion(version))            
+                ksparser.readKickstartFromString(kickstart)
+
+                print(f"Valid kickstart for {version.replace('F','Fedora')}")
+
+        except KickstartError as exc:
+            print(f"Invalid Kickstart for {version.replace('F','Fedora')}:\n{exc}")
+
+        finally:
+            Path(tmp_file).unlink()
+
 
