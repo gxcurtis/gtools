@@ -14,11 +14,11 @@ timesource --ntp-pool={{ pool }}
   {%- endfor %}
 {%- endif %}
 
-{{ interface_type }}
+{{- interface_type }}
 {{ system_action }}
 firstboot --{{ firstboot }}
 eula --{{ eula }}
-{% for repo in software.repos %}
+{%- for repo in software.repos %}
 {%- if repo.name and repo.baseurl %}
 repo --name={{ repo.name }} --baseurl={{ repo.baseurl }} {%- if repo.install %} --install{% endif %}
 {%- endif %}
@@ -84,7 +84,7 @@ firewall --enable
   {%- if firewall.smtp %} --smtp{% endif %}
   {%- if firewall.ports %} --port={{ firewall.ports | join(',') }}{% endif %}
   {%- if firewall.services %} --service={{ firewall.services | join(',') }}{% endif %}
-{% endif %}
+{%- endif %}
 {%- if logging.host %}
 logging --host={{ logging.host }}
   {%- if logging.port %} --port={{ logging.port }}{% endif %}
