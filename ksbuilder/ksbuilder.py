@@ -88,14 +88,22 @@ def hash_password(password, grub=False):
 
     if grub:
         command = ["grub2-mkpasswd-pbkdf2"]
-        result = subprocess.run(command, input=f"{password}\n{password}\n", capture_output=True, text=True, check=True)
-        match = re.search(r"grub\.pbkdf2\.sha512\.\d+\.[0-9A-Fa-f]+\.[0-9A-Fa-f]+", result.stdout)
-        hashed_password = match.group()
+        password = f"{password}\n{password}\n"
     else:
         command = ["openssl", "passwd", "-6", "-stdin"]
-        result = subprocess.run(command, input=password, capture_output=True, text=True, check=True)
-        hashed_password = result.stdout
     
+    try:
+        result = subprocess.run(command, input=password, capture_output=True, text=True, check=True)
+    except TypeError:
+        result = subprocess.run(command, input=password, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True, check=True)
+        
+    if grub:
+        match = re.search(r"grub\.pbkdf2\.sha512\.\d+\.[0-9A-Fa-f]+\.[0-9A-Fa-f]+", result.stdout)
+
+        hashed_password = match.group()
+    else:
+        hashed_password = result.stdout
+
     return hashed_password.strip()
 
 def parse_cidr_ip(cidr_ip):
