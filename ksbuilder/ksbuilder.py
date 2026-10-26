@@ -404,10 +404,10 @@ if __name__ == '__main__':
     if args.json_file:
         with args.json_file as f:
             inputs = json.load(f)     
-        ksdata = merge_kickstart_data(inputs, defaults)
+        ksdata = merge_kickstart_data(inputs, kickstart_defaults)
     elif not sys.stdin.isatty():
         inputs = json.load(sys.stdin)
-        ksdata = merge_kickstart_data(inputs, defaults)
+        ksdata = merge_kickstart_data(inputs, kickstart_defaults)
     else:
         ksdata = kickstart_defaults
 
