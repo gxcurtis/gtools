@@ -1,5 +1,6 @@
 %post --interpreter=/usr/bin/bash --log=/root/post-kickstart.log
 
+systemctl enable serial-getty@ttyS0.service
 {%- if bootloader.superuser != 'root' %}
 
 # Reconfigure grub bootloader user from default 'root'

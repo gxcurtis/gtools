@@ -475,27 +475,28 @@ if __name__ == '__main__':
     kickstart = render_kickstart_template(ksdata, outfile=args.outfile)
 
     if validation_available:
-        if args.versions is not None and args.versions != []:
-            versions = args.versions
-        else:
-            versions = latest_versions
+        if args.versions is not None:
+            if args.versions != []:
+                versions = args.versions
+            else:
+                versions = latest_versions
 
-        tmp_file = ksdata["storage"]["includefile"]
+            tmp_file = ksdata["storage"]["includefile"]
 
-        render_kickstart_template(ksdata, outfile=tmp_file, template="storage.j2")
+            render_kickstart_template(ksdata, outfile=tmp_file, template="storage.j2")
 
-        print("Validation Summary")
-        print("------------------")
-        for version in versions:
-            try:
-                ksparser = KickstartParser(makeVersion(version))            
-                ksparser.readKickstartFromString(kickstart)
+            print("Validation Summary")
+            print("------------------")
+            for version in versions:
+                try:
+                    ksparser = KickstartParser(makeVersion(version))            
+                    ksparser.readKickstartFromString(kickstart)
 
-                print(f"Valid kickstart for {version.replace('F','Fedora')}")
+                    print(f"Valid kickstart for {version.replace('F','Fedora')}")
 
-            except KickstartError as exc:
-                print(f"Invalid Kickstart for {version.replace('F','Fedora')}:\n{exc}")
+                except KickstartError as exc:
+                    print(f"Invalid Kickstart for {version.replace('F','Fedora')}:\n{exc}")
 
-        if Path(tmp_file).exists():
-            Path(tmp_file).unlink()
+            if Path(tmp_file).exists():
+                Path(tmp_file).unlink()
 
