@@ -107,14 +107,14 @@ bootloader --location={{ bootloader.location }}
 {%- endif %}
 {% for user in users %}
 user --name={{ user.name }}
-  {%- if user.password %} --password={{ user.password }}
-    {%- if user.iscrypted %} --iscrypted{% endif %}
+  {%- if user.password is defined and user.password %} --password={{ user.password }}
+    {%- if user.iscrypted is defined and user.iscrypted %} --iscrypted{% endif %}
   {%- endif %}
-{%- if user.homedir %} --homedir={{ user.homedir }}{% endif %}
-{%- if user.shell %} --shell={{ user.shell }}{% endif %}
-{%- if user.gecos %} --gecos='{{ user.gecos }}'{% endif %}
-{%- if user.groups %} --groups={{ user.groups | join(' ') }}{% endif %}
-{% if user.sshkey %}sshkey --username={{ user.name }} "{{ user.sshkey }}"{% endif %}
+{%- if user.homedir is defined %} --homedir={{ user.homedir | default('/home/' ~ user.name, true) }}{% endif %}
+{%- if user.shell is defined %} --shell={{ user.shell | default('/bin/bash', true) }}{% endif %}
+{%- if user.gecos is defined and user.gecos %} --gecos='{{ user.gecos }}'{% endif %}
+{%- if user.groups is defined and user.groups %} --groups={{ user.groups | join(' ') }}{% endif %}
+{% if user.sshkey is defined and user.sshkey %}sshkey --username={{ user.name }} "{{ user.sshkey }}"{% endif %}
 {%- endfor %}
 
 %include {{ storage.includefile }}
