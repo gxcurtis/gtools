@@ -315,7 +315,7 @@ kickstart_defaults = {
                     "fstype": "xfs"
                 },
                 {
-                    "mount": "none",
+                    "mount": "swap",
                     "name": "swap",
                     "size": 4096,
                     "fstype": "swap"
