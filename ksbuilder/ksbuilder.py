@@ -188,7 +188,7 @@ kickstart_defaults = {
     "rootpw": {
         "iscrypted": True,
         "locked": False,
-        "password": hash_password("changeme")
+        "password": hash_password("install")
     },
     "bootloader": {
         "location": "mbr",        
@@ -203,7 +203,7 @@ kickstart_defaults = {
     "users": [
         {
             "name": "ansible",
-            "password": hash_password("changeme"),
+            "password": hash_password("install"),
             "iscrypted": True,
             "homedir": "/home/ansible",
             "shell": "/bin/bash",
@@ -373,7 +373,7 @@ stig_defaults = {
              "audit_backlog_limit=8192",
              "fips=1"
         ],
-        "password": hash_password("changeme", grub=True),
+        "password": hash_password("install", grub=True),
         "superuser": "bootadmin"
     },
     "software": {
@@ -385,7 +385,7 @@ stig_defaults = {
         ]    
     },
     "storage": {
-        "luks_passphrase": "changeme"
+        "luks_passphrase": "install"
     },
     "openscap": {
         "hardening": True,
@@ -431,6 +431,7 @@ if __name__ == '__main__':
         ip, netmask = parse_cidr_ip(args.ip)
         ksdata["network"]["ipv4"]["address"] = ip
         ksdata["network"]["ipv4"]["netmask"] = netmask
+        ksdata["network"]["bootproto"] = "static"
 
     if args.gateway is not None:
         ksdata["network"]["gateway"] = args.gateway

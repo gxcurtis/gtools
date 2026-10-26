@@ -85,11 +85,12 @@ firewall --enable
   {%- if firewall.smtp %} --smtp{% endif %}
   {%- if firewall.ports %} --port={{ firewall.ports | join(',') }}{% endif %}
   {%- if firewall.services %} --service={{ firewall.services | join(',') }}{% endif %}
-{%- endif %}
+{% endif %}
 {%- if logging.host %}
 logging --host={{ logging.host }}
   {%- if logging.port %} --port={{ logging.port }}{% endif %}
 {% endif %}
+
 {% if selinux %}selinux --{{ selinux }}{% endif %}
 rootpw {%- if rootpw.locked %} --lock{% endif %}
 {%- if rootpw.password %}
