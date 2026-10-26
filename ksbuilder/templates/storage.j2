@@ -29,8 +29,8 @@ emit_lvm() {
   # Grow LVM storage up to {{ storage.growth_percent }}% storage capacity
   local disk_size="$1"
   local percent={{ storage.growth_percent }}
-  local (( percent_size = disk_size * percent / 100 ))
-  local (( scale_factor = percent_size / MIN_SIZE ))
+  local percent_size = $((disk_size * percent / 100 ))
+  local scale_factor = $((percent_size / MIN_SIZE ))
   {% endif %}
 printf '%s\n' "volgroup $vgname pv.01"
 
@@ -143,10 +143,12 @@ if [[ $num_disks -lt 1 ]]; then
 {%- if storage.configuration == 'standard' %}
 else
     emit_single "${filtered_disks[0]}" > "$partfile"
+    emit_lvm "$smallest_disk_size" >> "$partfile"
 fi
 {%- elif storage.configuration == 'raid1' %}
 else
     emit_raid1 "${filtered_disks[0]}" "${filtered_disks[1]}" > "$partfile"
+    emit_lvm "$smallest_disk_size" >> "$partfile"
 fi
 {%- elif storage.configuration == 'dynamic' %}
 elif [[ $num_disks -eq 1 ]]; then
