@@ -115,7 +115,7 @@ def parse_cidr_ip(cidr_ip):
 def list_default_parameters(requested_defaults: list, ksdefaults: dict):
     keys = requested_defaults or ksdefaults.keys()
     selected = {key: ksdefaults[key] for key in keys}
-    print(json.dumps(selected, indent=3))
+    print(json.dumps(selected, indent=4))
 
 def merge_kickstart_data(ksinputs: dict, ksdefaults: dict):
     kickstart_data = ksdefaults

@@ -114,7 +114,7 @@ user --name={{ user.name }}
 {%- if user.shell %} --shell={{ user.shell }}{% endif %}
 {%- if user.gecos %} --gecos='{{ user.gecos }}'{% endif %}
 {%- if user.groups %} --groups={{ user.groups | join(' ') }}{% endif %}
-{%- if user.sshkey %}sshkey --username={{ user.name }} "{{ user.sshkey }}"{%- endif %}
+{%- if user.sshkey %}sshkey --username={{ user.name }} "{{ user.sshkey }}"{% endif %}
 {%- endfor %}
 
 %include {{ storage.includefile }}
