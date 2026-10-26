@@ -36,7 +36,7 @@ def build_parser():
     parser.add_argument("-o", "--output", dest="outfile", help="Output file path")
     parser.add_argument("-l", "--list-defaults", nargs="*", choices=kickstart_defaults.keys(), metavar="KEY", help="Print defaults for specifed parameters, or all parameters if omitted")
     parser.add_argument("--stig", action="store_true", help="Use defaults with additional STIG inputs")
-    parser.add_argument("--storage", choices=["auto","standard","raid1","dynamic"], default="dynamic", help="Specify a storage configuration strategy")
+    parser.add_argument("--storage", choices=["auto","standard","raid1","dynamic"], help="Specify a storage configuration strategy")
     parser.add_argument("--hostname", help="Set hostname")
     parser.add_argument("--ip", help="Set IPv4 address in CIDR notation")
     parser.add_argument("--gateway", help="Set IPv4 gateway")
