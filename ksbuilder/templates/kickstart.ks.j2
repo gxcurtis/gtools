@@ -1,7 +1,7 @@
 # Produced by ksbuilder
 lang {{ lang }}
 keyboard --vckeymap={{ keyboard.vckeymap }} --xlayouts='{{ keyboard.xlayouts }}'
-timezone {{ timezone }}
+timezone {{ timezone }} --utc
 {%- if timesource.ntp_disable %}
 timesource --ntp-disable
 {%- elif timesource.servers %}
@@ -14,7 +14,7 @@ timesource --ntp-pool={{ pool }}
   {%- endfor %}
 {%- endif %}
 
-{{- interface_type }}
+{{ interface_type }}
 {{ system_action }}
 firstboot --{{ firstboot }}
 eula --{{ eula }}
