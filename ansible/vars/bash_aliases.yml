@@ -40,4 +40,8 @@ alias_groups:
         command: python3 -m py_compile
       - name: pyvenv
         command: python3 -m venv
+  - name: Flatpak
+    aliases:
+      - name: zoom
+        command: flatpak run us.zoom.Zoom
       
