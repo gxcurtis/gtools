@@ -148,11 +148,11 @@ user --name={{ user.name }}
 %end
 {%- endif %}
 
-{% if post_ks_templates %}
+{% include 'post-installation.j2' %}
+
+{%- if post_ks_templates %}
 {%- for template in post_ks_templates %}
 {%- include template %} 
-
 {%- endfor %}
 {%- endif %}
-{%- endif -%}
-
+{%- endif %}

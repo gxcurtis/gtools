@@ -158,7 +158,6 @@ def add_stig_defaults(ksdata: dict):
         ksdata["firewall"]["system_defaults"] = False
         ksdata["storage"]["luks_passphrase"] = "install"
         ksdata["openscap"]["hardening"] = True
-        ksdata["post_ks_templates"] += ["post-hardening.j2"]
 
 # Default Kickstart Values
 kickstart_defaults = {
@@ -402,7 +401,7 @@ if __name__ == '__main__':
         inputs = json.load(sys.stdin)
         ksdata = merge_kickstart_data(inputs, defaults)
     else:
-        ksdata = defaults
+        ksdata = kickstart_defaults
 
     ### Set calculated minimum disk size 
     ksdata["storage"]["min_size"] = calc_min_storage(ksdata["storage"])
@@ -477,7 +476,6 @@ if __name__ == '__main__':
 
         render_kickstart_template(ksdata, outfile=tmp_file, template="storage.j2")
 
-        print()
         print("Validation Summary")
         print("------------------")
         for version in versions:

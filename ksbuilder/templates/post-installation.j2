@@ -1,7 +1,21 @@
 %post --interpreter=/usr/bin/bash --log=/root/post-kickstart.log
 
-{%- if firewall.enabled %}
+{%- if bootloader.superuser != 'root' %}
 
+# Reconfigure grub bootloader user from default 'root'
+sed -i \
+    -e 's/set superusers="root"/set superusers="{{ bootloader.superuser }}"/' \
+    -e 's/password_pbkdf2 root /password_pbkdf2 {{ bootloader.superuser }} /' \
+    /etc/grub.d/01_users
+
+if [ -d /sys/firmware/efi ]; then
+    grub2-mkconfig -o /etc/grub2-efi.cfg
+else
+    grub2-mkconfig -o /etc/grub2.cfg
+fi
+{% endif %}
+{%- if openscap.hardening %}
+{%- if firewall.enabled %}
 # Configure firewalld default zone to 'drop' per DISA STIG
 target_zone=drop
 services=$(firewall-offline-cmd --list-services)
@@ -17,21 +31,8 @@ done
 
 firewall-offline-cmd --set-default-zone="$target_zone"
 {%- endif %}
-{% if bootloader.superuser != 'root' %}
-# Reconfigure grub bootloader user from default 'root' per DISA STIG
-sed -i \
-    -e 's/set superusers="root"/set superusers="{{ bootloader.superuser }}"/' \
-    -e 's/password_pbkdf2 root /password_pbkdf2 {{ bootloader.superuser }} /' \
-    /etc/grub.d/01_users
 
-if [ -d /sys/firmware/efi ]; then
-    grub2-mkconfig -o /etc/grub2-efi.cfg
-else
-    grub2-mkconfig -o /etc/grub2.cfg
-fi
-{%- endif %}
-
-# Update OpenSSH Ciphers + MACS per DISA STIG
+# Update OpenSSH Ciphers + MACs per DISA STIG
 ssh_crypto_config=/etc/crypto-policies/back-ends/openssh.config
 if [[ -f $ssh_crypto_config ]]; then
    cp "$ssh_crypto_config" "${ssh_crypto_config}.bak" || exit 1
@@ -47,14 +48,14 @@ else
    echo "ERROR: file not found $ssh_crypto_config"
 fi
 
-# Update OpenSSH Server Ciphers + MACS per DISA STIG
+# Update OpenSSH Server Ciphers + MACs per DISA STIG
 sshserver_crypto_config=/etc/crypto-policies/back-ends/opensshserver.config
 if [[ -f $sshserver_crypto_config ]]; then
    cp "$sshserver_crypto_config" "${sshserver_crypto_config}.bak"
 
    if sed -E -i \
       -e 's/-oCiphers=[[:graph:]]+/-oCiphers=aes256-ctr,aes192-ctr,aes128-ctr,aes256-gcm@openssh.com,aes128-gcm@openssh.com/g' \
-      -e 's/-oMACS=[[:graph:]]+/-oMACS=hmac-sha2-512,hmac-sha2-256,hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com/g' \
+      -e 's/-oMACs=[[:graph:]]+/-oMACs=hmac-sha2-512,hmac-sha2-256,hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com/g' \
       "$sshserver_crypto_config"
    then
       echo "Processed OpenSSH Server Ciphers & MACs: $sshserver_crypto_config"
@@ -77,5 +78,14 @@ if [[ -f $gnutls_crypto_config ]]; then
 else
    echo "ERROR: file not found $gnutls_crypto_config"
 fi
+
+# PW Quality 3 retries
+if sed -i -E \
+    's/^[[:space:]]*#?[[:space:]]*retry[[:space:]]*=.*/retry = 3/' \
+    /etc/security/pwquality.conf
+then
+  echo "Processed pwquality.conf to include retry=3"
+
+{%- endif %}
 
 %end
