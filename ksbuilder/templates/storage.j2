@@ -29,8 +29,8 @@ emit_lvm() {
   # Grow LVM storage up to {{ storage.growth_percent }}% storage capacity
   local disk_size="$1"
   local percent={{ storage.growth_percent }}
-  local percent_size = $((disk_size * percent / 100 ))
-  local scale_factor = $((percent_size / MIN_SIZE ))
+  local percent_size = $(( disk_size * percent / 100 ))
+  local scale_factor = $(( (percent_size - MIN_SIZE) / (MIN_SIZE / 4) ))
   {% endif %}
 printf '%s\n' "volgroup $vgname pv.01"
 
@@ -38,7 +38,7 @@ for logvol in "${LOGVOLS[@]}"; do
   local -n lv="$logvol"
 
   # Scale up logical volume by calculated factor (lv[3] = size)
-  (( scale_factor > 1 )) && (( lv[3] = scale_factor * lv[3] ))
+  (( scale_factor > 4 )) && (( lv[3] = (lv[3] / 4) * scale_factor ))
 
   printf 'logvol %s --vgname=%s --name=%s --fstype=%s --size=%s\n' \
     "${lv[0]}" \
