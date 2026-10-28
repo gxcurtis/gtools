@@ -1,6 +1,6 @@
 # Work Planner
 
-### {{DATE}}
+### DATE: 
 
 #### Upcoming:
 
