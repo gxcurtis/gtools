@@ -115,8 +115,6 @@ stage_files_directories() {
   cp -a /usr/lib/grub/x86_64-efi "$GRUB_DIR/"
   cp -a /usr/lib/grub/i386-pc "$GRUB_DIR/"
   cp -a resources "$DATA_MOUNTPOINT/"
-
-  chmod -R a+rX "$DATA_MOUNTPOINT/"
 }
 
 setup_grub_bios() {
@@ -197,7 +195,19 @@ cleanup() {
   done
 }
 
-# MAIN #
+### MAIN ###
+
+while getopts ':l:' opt; do
+    case "$opt" in
+        l)  DATA_LABEL="$OPTARG";;
+        :) printf 'Missing argument -%s' "$OPTARG" ;;
+        \?) printf 'Invalid argument -%s' "$OPTARG" ;;
+    esac
+done
+
+shift "$(( OPTIND - 1 ))"
+
+
 if [[ -z "$DEV" ]]; then
   echo "Missing <device> argument."
   usage
@@ -230,6 +240,9 @@ else
   stage_files_directories
   setup_grub_bios
   setup_grub_efi
+
+  chmod -R u+rwX,g+rwX,o+rX "$DATA_MOUNTPOINT/"
+  chown -R root:wheel "$DATA_MOUNTPOINT/"
   echo
 
   printf "Boot device setup.\n\n"
