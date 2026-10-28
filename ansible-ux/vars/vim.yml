@@ -1,4 +1,6 @@
 ---
+vim_template_dir: ~/.vim/templates
+
 vim_templates:
   - cmd_name: Getopts
     filename: getopts.sh
@@ -24,3 +26,5 @@ vim_templates:
     filename: systemd.slice
   - cmd_name: Sdswap
     filename: systemd.swap
+  - cmd_name: Newplanner
+    filename: planner-README.md
