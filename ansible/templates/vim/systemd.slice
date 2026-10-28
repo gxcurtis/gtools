@@ -1,0 +1,25 @@
+[Unit]
+Description=Systemd Slice Unit
+# Before=
+# After=
+# Wants=
+# Requires=
+
+[Slice]
+# CPUAccounting=
+# CPUWeight=
+# CPUQuota=
+# MemoryAccounting=
+# MemoryLow=
+# MemoryHigh=
+# MemoryMax=
+# MemorySwapMax=
+# TasksAccounting=
+# TasksMax=
+# IOAccounting=
+# IOWeight=
+# IOReadBandwidthMax=
+# IOWriteBandwidthMax=
+
+[Install]
+WantedBy=slices.target

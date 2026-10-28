@@ -1,0 +1,49 @@
+[Unit]
+Description=Systemd Service Unit
+After=network.target
+# Documentation=
+# Wants=
+# Requires=
+# Before=
+# Conflicts=
+# ConditionPathExists=
+# AssertPathExists=
+
+[Service]
+Type=exec
+ExecStart=/usr/bin/true
+Restart=on-failure
+RestartSec=5s
+# User=
+# Group=
+# WorkingDirectory=
+# Environment=
+# EnvironmentFile=
+# ExecCondition=
+# ExecStartPre=
+# ExecStartPost=
+# ExecReload=
+# ExecStop=
+# ExecStopPost=
+# TimeoutStartSec=
+# TimeoutStopSec=
+# KillMode=
+# KillSignal=
+# SuccessExitStatus=
+# StandardOutput=
+# StandardError=
+# SyslogIdentifier=
+# NoNewPrivileges=
+# PrivateTmp=
+# ProtectSystem=
+# ProtectHome=
+# ReadWritePaths=
+# MemoryMax=
+# CPUQuota=
+# TasksMax=
+
+[Install]
+WantedBy=multi-user.target
+# RequiredBy=
+# Alias=
+# Also=

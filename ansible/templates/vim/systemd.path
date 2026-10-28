@@ -1,0 +1,20 @@
+[Unit]
+Description=Systemd Path Unit
+# After=
+# Wants=
+# Requires=
+
+[Path]
+PathChanged=/tmp/example
+# PathExists=
+# PathExistsGlob=
+# PathModified=
+# DirectoryNotEmpty=
+# Unit=
+# MakeDirectory=
+# DirectoryMode=
+# TriggerLimitIntervalSec=
+# TriggerLimitBurst=
+
+[Install]
+WantedBy=multi-user.target

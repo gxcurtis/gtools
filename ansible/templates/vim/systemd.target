@@ -1,0 +1,14 @@
+[Unit]
+Description=Systemd Target Unit
+# Wants=
+# Requires=
+# After=
+# Before=
+# Conflicts=
+# AllowIsolate=
+# StopWhenUnneeded=
+
+[Install]
+WantedBy=multi-user.target
+# RequiredBy=
+# Alias=

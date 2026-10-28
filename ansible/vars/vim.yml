@@ -1,4 +1,26 @@
 ---
 vim_templates:
   - cmd_name: Getopts
-    filename: getopts-template.sh
+    filename: getopts.sh
+  - cmd_name: Sdservice
+    filename: systemd.service
+  - cmd_name: Sdoneshot
+    filename: systemd.oneshot
+  - cmd_name: Sdtimer
+    filename: systemd.timer
+  - cmd_name: Sdmount
+    filename: systemd.mount
+  - cmd_name: Sdautomount
+    filename: systemd.automount
+  - cmd_name: Sdsocket
+    filename: systemd.socket
+  - cmd_name: Sdcontainer
+    filename: systemd.container
+  - cmd_name: Sdtarget
+    filename: systemd.target
+  - cmd_name: Sdpath
+    filename: systemd.path
+  - cmd_name: Sdslice
+    filename: systemd.slice
+  - cmd_name: Sdswap
+    filename: systemd.swap

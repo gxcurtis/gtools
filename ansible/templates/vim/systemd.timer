@@ -1,0 +1,30 @@
+[Unit]
+Description=Systemd Timer Unit
+# After=
+# Wants=
+# Requires=
+
+[Timer]
+OnCalendar=daily
+# OnCalendar=DayOfWeek Year-Month-Day Hour:Minute:Second
+# OnCalendar=Mon..Fri *-*-* 08:00:00
+# OnCalendar=*-*-* 00:00:00
+# OnCalendar=*-*-01 00:00:00
+# OnCalendar=hourly
+# OnCalendar=weekly
+# OnCalendar=monthly
+# OnCalendar=yearly
+# OnCalendar=*:0/15
+Persistent=true
+AccuracySec=1min
+# OnBootSec=
+# OnStartupSec=
+# OnActiveSec=
+# OnUnitActiveSec=
+# OnUnitInactiveSec=
+# RandomizedDelaySec=
+# FixedRandomDelay=
+# Unit=
+
+[Install]
+WantedBy=timers.target

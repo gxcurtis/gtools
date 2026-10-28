@@ -1,0 +1,15 @@
+[Unit]
+Description=Systemd Swap Unit
+# After=
+# Before=
+# Wants=
+# Requires=
+
+[Swap]
+What=/swapfile
+# Priority=
+# Options=
+# TimeoutSec=
+
+[Install]
+WantedBy=swap.target

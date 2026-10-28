@@ -38,6 +38,7 @@ nnoremap <C-w>h <C-w>;
 " User defined commands
 command! -nargs=* Shellcheck execute '!shellcheck ' . shellescape(expand('%:p'))
 command! -nargs=* Ruffcheck execute '!ruff check ' . shellescape(expand('%:p'))
+command! Sdverify execute '!systemd-analyze verify ' . shellescape(expand('%:p'))
 command! Ansiblelint execute '!ansible-lint ' . shellescape(expand('%:p'))
 
 " Templates as commands
@@ -56,7 +57,3 @@ augroup two_space
   autocmd FileType jinja,jinja2,htmldjango,yaml setlocal expandtab tabstop=2 softtabstop=2 shiftwidth=2
 augroup END
 
-augroup three_space
-  autocmd!
-  autocmd FileType html,css setlocal expandtab tabstop=3 softtabstop=3 shiftwidth=3
-augroup END

@@ -10,6 +10,8 @@ alias_groups:
         command: echo $?
       - name: arsync
         command: rsync -havuHP --stat
+      - name: sdverify
+        command: systemd-analyze verify
       - name: sl
         command: systemctl
       - name: jl

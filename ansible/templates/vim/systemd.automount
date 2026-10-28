@@ -1,0 +1,13 @@
+[Unit]
+Description=Systemd Automount Unit
+# After=
+# Wants=
+# Requires=
+
+[Automount]
+Where=/mnt/data
+TimeoutIdleSec=300
+# DirectoryMode=
+
+[Install]
+WantedBy=multi-user.target

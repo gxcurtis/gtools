@@ -1,0 +1,20 @@
+[Unit]
+Description=Systemd Mount Unit
+# After=
+# Wants=
+# Requires=
+# Before=
+
+[Mount]
+What=/dev/disk/by-label/DATA
+Where=/mnt/data
+Type=xfs
+Options=defaults
+# DirectoryMode=
+# TimeoutSec=
+# SloppyOptions=
+# LazyUnmount=
+# ForceUnmount=
+
+[Install]
+WantedBy=multi-user.target

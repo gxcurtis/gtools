@@ -1,0 +1,23 @@
+[Unit]
+Description=Systemd Socket Unit
+# After=
+# Wants=
+# Requires=
+
+[Socket]
+ListenStream=8080
+Accept=no
+# ListenDatagram=
+# ListenSequentialPacket=
+# SocketUser=
+# SocketGroup=
+# SocketMode=
+# DirectoryMode=
+# Backlog=
+# Service=
+# RemoveOnStop=
+# FreeBind=
+# BindIPv6Only=
+
+[Install]
+WantedBy=sockets.target

@@ -1,0 +1,47 @@
+[Unit]
+Description=Systemd Container Unit
+After=network-online.target
+Wants=network-online.target
+# Requires=
+# Before=
+# ConditionPathExists=
+
+[Container]
+Image=registry.example.com/example:latest
+ContainerName=example
+# Exec=
+# Environment=
+# EnvironmentFile=
+# PublishPort=
+# Volume=
+# Network=
+# Pod=
+# User=
+# Group=
+# WorkingDir=
+# Entrypoint=
+# Label=
+# HealthCmd=
+# HealthInterval=
+# HealthRetries=
+# HealthTimeout=
+# AutoUpdate=
+# ReadOnly=
+# NoNewPrivileges=
+# DropCapability=
+# AddCapability=
+# Secret=
+
+[Service]
+Restart=on-failure
+RestartSec=5s
+# TimeoutStartSec=
+# TimeoutStopSec=
+# ExecStartPre=
+# ExecStartPost=
+# ExecStopPost=
+# User=
+# Group=
+
+[Install]
+WantedBy=multi-user.target

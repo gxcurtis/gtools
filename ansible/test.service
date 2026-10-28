@@ -1,0 +1,27 @@
+[Unit]
+Description=Systemd Oneshot Service Unit
+# After=
+# Wants=
+# Requires=
+# ConditionPathExists=
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/true
+RemainAfterExit=yes
+# User=
+# Group=
+# WorkingDirectory=
+# Environment=
+# EnvironmentFile=
+# ExecCondition=
+# ExecStartPre=
+# ExecStartPost=
+# ExecStop=
+# TimeoutStartSec=
+# StandardOutput=
+# StandardError=
+
+[Install]
+WantedBy=multi-user.target
+# RequiredBy=

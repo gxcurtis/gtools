@@ -57,7 +57,7 @@
 
     - name: Add vim templates
       template:
-        src: "templates/vim/{{ item.filename }}.j2"
+        src: "templates/vim/{{ item.filename }}"
         dest: "~/.vim/templates/{{ item.filename }}"
       loop: "{{ vim_templates }}"
 
