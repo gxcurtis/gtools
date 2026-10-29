@@ -26,5 +26,4 @@ vim_templates:
     filename: systemd.slice
   - cmd_name: Sdswap
     filename: systemd.swap
-  - cmd_name: Newplanner
-    filename: planner-README.md
+

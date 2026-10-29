@@ -60,4 +60,4 @@
       command: xrdb -merge {{ user.home }}/.Xresources 
 
     - name: Refresh font cache
-      command: fc-cache -f {{ jetbrains_font_directory }}
+      command: fc-cache -f {{ font_dir }}/JetBrainsMono

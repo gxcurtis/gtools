@@ -7,3 +7,8 @@
   template:
     src: ../templates/neovim/init.lua.j2
     dest: "{{ user.home }}/.config/nvim/init.lua"
+
+- name: Remove init.vim
+  file:
+    path: "{{ user.home }}/.config/nvim/init.vim"
+    state: absent
