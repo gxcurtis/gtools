@@ -15,7 +15,7 @@ else
     grub2-mkconfig -o /etc/grub2.cfg
 fi
 {% endif %}
-{%- if openscap.hardening %}
+{%- if openscap.hardening or firewall.zone %}
 {%- if firewall.enabled %}
 # Configure firewalld default zone to 'drop' per DISA STIG
 target_zone=drop

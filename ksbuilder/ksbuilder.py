@@ -164,6 +164,7 @@ def add_stig_defaults(ksdata: dict):
         ksdata["network"]["ipv6"]["enabled"] = False
         ksdata["network"]["nameservers"] += ["9.9.9.9","8.8.8.8","1.1.1.1"]
         ksdata["firewall"]["system_defaults"] = False
+        ksdata["firewall"]["zone"] = "drop",
         ksdata["storage"]["luks_passphrase"] = "install"
         ksdata["openscap"]["hardening"] = True
 
@@ -186,6 +187,7 @@ kickstart_defaults = {
     "firstboot": "disable",
     "firewall": {
         "enabled": True,
+        "zone": "",
         "system_defaults": True,
         "ssh": True,
         "http": False,
