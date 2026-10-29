@@ -29,8 +29,11 @@ emit_lvm() {
   # Grow LVM storage up to {{ storage.growth_percent }}% storage capacity
   local disk_size="$1"
   local percent={{ storage.growth_percent }}
-  local percent_size = $(( disk_size * percent / 100 ))
-  local scale_factor = $(( (percent_size - MIN_SIZE) / (MIN_SIZE / 4) ))
+  local percent_size=$(( disk_size / (1024 * 1024) * percent / 100 ))
+  local baseline_size=$(( MIN_SIZE / (1024 * 1024) ))
+  local scale_factor=$(( percent_size * 4 / baseline_size ))
+  {%- else %}
+  local scale_factor=0
   {% endif %}
 printf '%s\n' "volgroup $vgname pv.01"
 
