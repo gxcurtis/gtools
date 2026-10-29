@@ -1,22 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-SCRIPT="$0"
-ESP_LABEL='BOOTME'
-DATA_LABEL='INSTALL'
-DEV="${1:-}"
-ESP_MOUNTPOINT="/mnt/ESP"
-DATA_MOUNTPOINT="/mnt/DATA"
-EFI_BOOT_DIR="$ESP_MOUNTPOINT/EFI/BOOT"
-GRUB_DIR="$DATA_MOUNTPOINT/boot/grub2"
-RESOURCE_DIR="$DATA_MOUNTPOINT/resources/"
-DISTRO_DIRS=(
-  rhel/{7..10}
-  rocky/{8..10}
-  centos/{8..10}
-  fedora
-)
-
 usage() {
   echo
   echo "Usage: sudo $SCRIPT <device> (e.g. /dev/sdX /dev/loopX)"
@@ -197,6 +181,21 @@ cleanup() {
 
 ### MAIN ###
 
+SCRIPT="$0"
+ESP_LABEL='BOOTME'
+DATA_LABEL='INSTALL'
+ESP_MOUNTPOINT="/mnt/ESP"
+DATA_MOUNTPOINT="/mnt/DATA"
+EFI_BOOT_DIR="$ESP_MOUNTPOINT/EFI/BOOT"
+GRUB_DIR="$DATA_MOUNTPOINT/boot/grub2"
+RESOURCE_DIR="$DATA_MOUNTPOINT/resources/"
+DISTRO_DIRS=(
+  rhel/{7..10}
+  rocky/{8..10}
+  centos/{8..10}
+  fedora
+)
+
 while getopts ':l:' opt; do
     case "$opt" in
         l)  DATA_LABEL="$OPTARG";;
@@ -207,6 +206,7 @@ done
 
 shift "$(( OPTIND - 1 ))"
 
+DEV="${1:-}"
 
 if [[ -z "$DEV" ]]; then
   echo "Missing <device> argument."
