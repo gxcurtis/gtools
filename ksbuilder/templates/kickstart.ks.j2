@@ -18,7 +18,7 @@ timesource --ntp-pool={{ pool }}
 {{ after_install }}
 firstboot --{{ firstboot }}
 eula --{{ eula }}
-{%- for repo in software.repos %}
+{% for repo in software.repos %}
 {%- if repo.name and repo.baseurl %}
 repo --name={{ repo.name }} --baseurl={{ repo.baseurl }} {%- if repo.install %} --install{% endif %}
 {%- endif %}
