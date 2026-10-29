@@ -1,15 +1,30 @@
-- name: Install packages
-  package:
-    name:
-      - neovim
-      - npm
-      - nodejs
-      - git
-      - python3-pip
-    state: present
-  tags:
-    - repos
+- name: Software block
+  block:
+  - name: Install packages
+    become: true
+    package:
+      name:
+        - neovim
+        - npm
+        - nodejs
+        - git
+        - python3-pip
+      state: present
+    tags: repos
 
+  - name: Install npm pyright globally
+    community.general.npm:
+      name: pyright
+      state: present
+      global: true
+    become: true
+    tags: www
+
+  rescue:
+    - name: Rescue message
+      debug:
+        msg: Probably need sudo to install packages.
+        
 - name: Get package facts
   package_facts:
     manager: auto

@@ -1,11 +1,11 @@
 - name: Add vimrc config
   template:
     src: templates/vim/vimrc.j2
-    dest: "{{ u.home }}/.vimrc"
+    dest: "{{ user.home }}/.vimrc"
 
 - name: Make vim templates directory
   file:
-    path: "{{ u.home }}/.vim/templates"
+    path: "{{ user.home }}/.vim/templates"
     state: directory
 
 - name: Add vim templates

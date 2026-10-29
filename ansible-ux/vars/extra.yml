@@ -1,4 +1,0 @@
----
-jetbrains_font_version: "2.304"
-jetbrains_font_directory: "{{ ansible_facts['user_dir'] }}/.local/share/fonts/JetBrainsMono-{{ jetbrains_font_version }}"
-
