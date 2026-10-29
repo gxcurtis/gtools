@@ -15,10 +15,9 @@ else
     grub2-mkconfig -o /etc/grub2.cfg
 fi
 {% endif %}
-{%- if openscap.hardening or firewall.zone %}
-{%- if firewall.enabled %}
-# Configure firewalld default zone to 'drop' per DISA STIG
-target_zone=drop
+{%- if firewall.enabled and firewall.zone %}
+# Configure firewalld default zone
+target_zone={{ firewall.zone }}
 services=$(firewall-offline-cmd --list-services)
 ports=$(firewall-offline-cmd --list-ports)
 
@@ -32,6 +31,7 @@ done
 
 firewall-offline-cmd --set-default-zone="$target_zone"
 {%- endif %}
+{%- if openscap.hardening %}
 
 # Update OpenSSH Ciphers + MACs per DISA STIG
 ssh_crypto_config=/etc/crypto-policies/back-ends/openssh.config
