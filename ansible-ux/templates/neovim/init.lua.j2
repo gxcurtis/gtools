@@ -3,7 +3,6 @@ vim.opt.tabstop = 4
 vim.opt.shiftwidth = 4
 vim.opt.shifttabstop = 4
 vim.opt.expandtab = true
-vim.opt.autoindent = true
 vim.opt.smartindent = true
 vim.opt.number = true
 
@@ -19,3 +18,17 @@ vim.keymap.set("n", "<C-w>l", "<C-w>k")
 vim.keymap.set("n", "<C-w>;", "<C-w>l")
 vim.keymap.set("n", "<C-w>h", "<C-w>;")
 
+-- Python language server
+vim.lsp.config("pyright", {
+    cmd = { "pyright-langserver", "--stdio" },
+    filetypes = { "python" },
+    root_markers = { "pyproject.toml", "setup.py", ".git" },
+})
+
+vim.lsp.enable("pyright")
+
+-- Keybindings
+vim.keymap.set("n", "gd", vim.lsp.buf.definition)
+vim.keymap.set("n", "K", vim.lsp.buf.hover)
+vim.keymap.set("n", "gr", vim.lsp.buf.references)
+vim.keymap.set("n", "<F2>", vim.lsp.buf.rename)
