@@ -1,0 +1,42 @@
+- name: Create home .bashrc.d inclusion directory
+  file:
+    path: "{{ u.home }}/.bashrc.d"
+    state: directory
+    owner: "{{ u.name }}"
+
+- name: Add inclusion logic for custom bash files
+  blockinfile:
+    block: |
+      for x in ~/.bashrc.d/*.bash; do
+        . "$x"
+      done
+    path: "{{ u.home }}/.bashrc"
+    state: present
+            
+- name: Add bashrc template files
+  template:
+    src: templates/{{ item }}.j2
+    dest: "{{ u.home }}/.bashrc.d/{{ item }}"
+    backup: true
+  loop:
+    - prompt.bash
+    - aliases.bash
+    - functions.bash
+    - variables.bash
+
+- name: Create user bash completions directory
+  file:
+    state: directory
+    path: "{{ u.home }}/.local/share/bash-completion/completions"
+
+- name: Register ksbuilder autocompletion
+  ansible.builtin.command:
+    cmd: "register-python-argcomplete ksbuilder"
+  register: argcomplete_ksbuilder
+  changed_when: false
+
+- name: Install Python completion scripts
+  ansible.builtin.copy:
+    content: "{{ argcomplete_ksbuilder.stdout }}\n"
+    dest: "{{ u.home }}/.local/share/bash-completion/completions/ksbuilder"
+

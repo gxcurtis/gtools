@@ -1,0 +1,35 @@
+- name: Add Jetbrains Mono Font
+  when: ansible_facts['system'] == 'Linux'
+  block:
+  - name: Create font_directory
+    file:
+      path: "{{ jetbrains_font_directory }}"
+      state: directory
+      mode: "0755"
+    when: ansible_facts['system'] == 'Linux'
+
+  - name: Download and extract JetBrains Mono Font
+    unarchive:
+      src: https://github.com/JetBrains/JetBrainsMono/releases/download/v{{ jetbrains_font_version }}/JetBrainsMono-{{ jetbrains_font_version }}.zip
+      dest: "{{ jetbrains_font_directory }}"
+      creates: "{{ jetbrains_font_directory }}/fonts/ttf/JetBrainsMono-Regular.ttf"
+      remote_src: true
+    notify: Refresh font cache
+    tags:
+      - www
+
+- name: Create user dot bin directory
+  file:
+    state: directory
+    path: "{{ u.home }}/.local/bin"
+
+- name: Symlink project tools to user dot bin directory
+  file:
+    src: "{{ item | realpath }}"
+    dest: "{{ u.home }}/.local/bin/{{ item | basename | splitext | first }}"
+    state: link
+  loop:
+    - "{{ playbook_dir }}/../ksbuilder/ksbuilder.py"
+    - "{{ playbook_dir }}/../buildaboot/build-bootdev.sh"
+    - "{{ playbook_dir }}/../setup-ux.sh"
+

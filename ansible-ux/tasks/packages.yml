@@ -1,0 +1,16 @@
+- name: Install packages
+  package:
+    name:
+      - neovim
+      - npm
+      - nodejs
+      - git
+      - python3-pip
+    state: present
+  tags:
+    - repos
+
+- name: Get package facts
+  package_facts:
+    manager: auto
+

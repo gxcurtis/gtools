@@ -1,0 +1,9 @@
+- name: Create nvim user directory
+  file:
+    state: directory
+    path: "{{ u.home }}/.config/nvim"
+
+- name: Copy init.lua to user nvim directory
+  template:
+    src: ../templates/neovim/init.lua.j2
+    dest: "{{ u.home }}/.config/nvim/init.lua"

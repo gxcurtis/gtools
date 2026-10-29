@@ -1,0 +1,7 @@
+- name: Add Xterm Xresources
+  template:
+    src: templates/Xresources.j2
+    dest: "{{ u.home }}/.Xresources"
+  when: "'xterm' in ansible_facts.packages"
+  notify: Merge xrdb
+
