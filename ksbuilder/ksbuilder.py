@@ -274,7 +274,7 @@ kickstart_defaults = {
         "configuration": "dynamic",
         "template": "storage.j2",
         "includefile": "/tmp/part-include",
-        "ignore_label": "INSTALL"
+        "ignore_label": "INSTALL",
         "luks_passphrase": "",
         "boot_efi_size": 600,
         "boot_size": 1024,
