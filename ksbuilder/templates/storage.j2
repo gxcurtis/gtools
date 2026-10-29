@@ -1,7 +1,7 @@
 %pre --interpreter=/usr/bin/bash --log=/tmp/pre-kickstart.log --erroronfail
 
 partfile="{{ storage.includefile }}"
-ignore_label=INSTALL
+ignore_label={{ storage.ignore_label }}
 vgname={{ storage.lvm.vgname }}
 
 # Sizes in MiB
