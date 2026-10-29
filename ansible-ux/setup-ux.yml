@@ -18,12 +18,16 @@
         u:
           name: "{{ ansible_facts['user_id'] }}"
           home: "{{ ansible_facts['user_dir'] }}"
+      tags:
+        - always
 
     - name: Create home .bashrc.d inclusion directory
       file:
         path: "{{ u.home }}/.bashrc.d"
         state: directory
         owner: "{{ u.name }}"
+      tags: 
+        - offline
     
     - name: Add inclusion logic for custom bash files
       blockinfile:
@@ -33,6 +37,8 @@
           done
         path: "{{ u.home }}/.bashrc"
         state: present
+      tags:
+        - offline
                 
     - name: Add bashrc template files
       template:
@@ -44,26 +50,36 @@
         - aliases.bash
         - functions.bash
         - variables.bash
+      tags:
+        - offline
 
     - name: Add vimrc config
       template:
         src: templates/vim/vimrc.j2
         dest: "{{ u.home }}/.vimrc"
+      tags:
+        - offline
     
     - name: Make vim templates directory
       file:
         path: "{{ u.home }}/.vim/templates"
         state: directory
+      tags:
+        - offline
 
     - name: Add vim templates
       template:
         src: "templates/vim/{{ item.filename }}"
         dest: "~/.vim/templates/{{ item.filename }}"
       loop: "{{ vim_templates }}"
+      tags:
+        - offline
 
     - name: Get package facts
       package_facts:
         manager: auto
+      tags:
+        - offline
 
     - name: Add Xterm Xresources
       template:
@@ -71,6 +87,8 @@
         dest: "{{ u.home }}/.Xresources"
       when: "'xterm' in ansible_facts.packages"
       notify: Merge xrdb
+      tags:
+        - offline
 
     - name: Add Jetbrains Mono Font
       when: ansible_facts['system'] == 'Linux'
@@ -89,11 +107,15 @@
           creates: "{{ jetbrains_font_directory }}/fonts/ttf/JetBrainsMono-Regular.ttf"
           remote_src: true
         notify: Refresh font cache
+      tags:
+        - online
 
     - name: Create user dot bin directory
       file:
         state: directory
         path: "{{ u.home }}/.local/bin"
+      tags:
+        - offline
 
     - name: Symlink project tools to user dot bin directory
       file:
@@ -104,12 +126,15 @@
         - "{{ playbook_dir }}/../ksbuilder/ksbuilder.py"
         - "{{ playbook_dir }}/../buildaboot/build-bootdev.sh"
         - "{{ playbook_dir }}/../setup-ux.sh"
-
+      tags:
+        - offline
 
     - name: Create user bash completions directory
       file:
         state: directory
         path: "{{ u.home }}/.local/share/bash-completion/completions"
+      tags:
+        - offline
 
     - name: Generate Python completion scripts
       ansible.builtin.command:
@@ -118,6 +143,8 @@
       changed_when: false
       loop:
         - ksbuilder
+      tags:
+        - offline
 
     - name: Install Python completion scripts
       ansible.builtin.copy:
@@ -125,10 +152,16 @@
         dest: "{{ u.home }}/.local/share/bash-completion/completions/{{ item.item }}"
       loop: "{{ argcomplete_scripts.results }}" 
       no_log: true
+      tags:
+        - offline
 
   handlers:
     - name: Merge xrdb
       command: xrdb -merge {{ u.home }}/.Xresources 
+      tags:
+        - offline
 
     - name: Refresh font cache
       command: fc-cache -f {{ jetbrains_font_directory }}
+      tags:
+        - offline
