@@ -1,10 +1,5 @@
 #!/usr/bin/env bash
 
-if [[ $EUID -ne 0 ]]; then
-    echo "Plese run as root (sudo)."
-    exit 1
-fi
-
 VMNAME="$1"
 CPUS=16
 MEM=32768
@@ -15,7 +10,7 @@ if [[ -z $VMNAME ]]; then
     exit 1
 fi 
 
-virt-install --osinfo rhel8.9 --name "$VMNAME" \
+sudo virt-install --osinfo rhel8.9 --name "$VMNAME" \
     --vcpus "$CPUS" --memory "$MEM" --graphics none --serial pty \
     --disk path=/vmcrypt/pool/"${VMNAME}"-base.qcow2,size="$DISK_SIZE",boot_order=1 \
     --disk path=/vmcrypt/pool/ce-install.img,readonly=on,shareable=on,boot_order=2 \
