@@ -34,6 +34,10 @@ def vm_state(vm):
 
     return result.stdout.strip()
 
+def dumpxml(vm):
+    result = run("virsh", "dumpxml", vm)
+    return ET.fromstring(result.stdout)
+
 def get_backing_file(vm, disk="vda"):
     result = run("virsh", "domblkinfo", vm, "--details")
 
