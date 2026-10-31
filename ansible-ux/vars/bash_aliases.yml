@@ -12,10 +12,6 @@ alias_groups:
         command: rsync -havuHP --stat
       - name: sdverify
         command: systemd-analyze verify
-      - name: sl
-        command: systemctl
-      - name: jl
-        command: journalctl
       - name: ip4
         command: ip -4 -br address
       - name: src

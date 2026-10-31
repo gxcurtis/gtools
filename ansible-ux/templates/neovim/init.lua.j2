@@ -1,9 +1,14 @@
 -- Neovim settings
 vim.opt.tabstop = 4
+vim.opt.softtabstop = 4
+vim.opt.shiftwidth = 4
 vim.opt.expandtab = true
 vim.opt.smartindent = true
 vim.opt.number = true
-
+vim.opt.numberwidth = 1
+vim.cmd.colorscheme("slate")
+    
+-- Navigation keybindings
 vim.keymap.set("", "j", "h")
 vim.keymap.set("", "k", "j")
 vim.keymap.set("", "l", "k")
@@ -16,11 +21,17 @@ vim.keymap.set("n", "<C-w>l", "<C-w>k")
 vim.keymap.set("n", "<C-w>;", "<C-w>l")
 vim.keymap.set("n", "<C-w>h", "<C-w>;")
 
+-- Convenience keybindings
+vim.keymap.set("i", "<C-j>", "<C-x><C-o>")
+
 -- Python language server
 vim.lsp.config("pyright", {
     cmd = { "pyright-langserver", "--stdio" },
     filetypes = { "python" },
     root_markers = { "pyproject.toml", "setup.py", ".git" },
+    on_attach = function(client, bufnr)
+        vim.lsp.completion.enable(true, client.id, bufner, { autotrigger = false })
+    end,
 })
 
 vim.lsp.enable("pyright")
