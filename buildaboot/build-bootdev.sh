@@ -196,9 +196,9 @@ DISTRO_DIRS=(
   fedora
 )
 
-while getopts ':l:' opt; do
+while getopts ':L:' opt; do
     case "$opt" in
-        l)  DATA_LABEL="$OPTARG";;
+        L)  DATA_LABEL="$OPTARG";;
         :) printf 'Missing argument -%s' "$OPTARG" ;;
         \?) printf 'Invalid argument -%s' "$OPTARG" ;;
     esac
