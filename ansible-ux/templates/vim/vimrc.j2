@@ -66,9 +66,11 @@ let g:lsp_diagnostics_echo_cursor = 1
 " Python LSP setup
 set completeopt=menuone,noselect,popup
 
-" Navigate completion menu
+" Navigate popup menus
 inoremap <expr> <Tab> pumvisible() ? "\<C-n>" : "\<Tab>"
 inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
+noremap <expr> <C-f> lsp#scroll(+4)
+noremap <expr> <C-d> lsp#scroll(-4)
 
 " Accept selected completion
 inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<CR>"
