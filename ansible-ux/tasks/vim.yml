@@ -10,7 +10,7 @@
 
 - name: Make vim plugins directory path
   file: 
-    path: "{{ user.home }}/.vim/pack/plugins/start"
+    path: "{{ vim_plugin_dir }}"
     state: directory
     recurse: true
 
@@ -20,3 +20,8 @@
     dest: "~/.vim/templates/{{ item.filename }}"
   loop: "{{ vim_templates }}"
 
+- name: Git clone vim plugins
+  git:
+    repo: "{{ item.repo_url }}"
+    dest: "{{ vim_plugin_dir}}/{{ item.name }}"
+  loop: "{{ vim_plugins }}"

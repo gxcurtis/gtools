@@ -57,8 +57,21 @@ augroup two_space
   autocmd FileType jinja,jinja2,htmldjango,yaml setlocal expandtab tabstop=2 softtabstop=2 shiftwidth=2
 augroup END
 
+" Enable LSP completion
+
+let g:lsp_diagnostics_enabled = 1
+
+let g:lsp_diagnostics_echo_cursor = 1
+
 " Python LSP setup
 set completeopt=menuone,noselect,popup
+
+" Navigate completion menu
+inoremap <expr> <Tab> pumvisible() ? "\<C-n>" : "\<Tab>"
+inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
+
+" Accept selected completion
+inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<CR>"
 
 augroup PythonLSP
     autocmd!
