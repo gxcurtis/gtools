@@ -12,6 +12,8 @@
           - build
           - setuptools
           - wheel
+          - requests
+          - bs4
         state: present
         extra_args: --user
   rescue:
