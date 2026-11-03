@@ -6,7 +6,13 @@ vim.opt.expandtab = true
 vim.opt.smartindent = true
 vim.opt.number = true
 vim.opt.numberwidth = 1
-vim.cmd.colorscheme("slate")
+vim.opt.wildchar = 9 -- Tab
+vim.opt.wildmenu = true
+vim.opt.wildmode = "full"
+local colorchoice = pcall(vim.cmd.colorscheme, "slate")
+if not colorchoice then
+  vim.cmd.colorscheme("default")
+end
     
 -- Navigation keybindings
 vim.keymap.set("", "j", "h")
