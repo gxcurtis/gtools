@@ -1,0 +1,20 @@
+---
+- name: Python3 pip block task
+  block:
+    - name: Pip install packages
+      pip:
+        name: 
+          - ansible-lint
+          - python-lsp-server
+          - packaging
+          - ruff
+          - pytest
+          - build
+          - setuptools
+          - wheel
+        state: present
+        extra_args: --user
+  rescue:
+    - name: Rescue message
+      debug:
+        msg: "Couldn't pip install packages"

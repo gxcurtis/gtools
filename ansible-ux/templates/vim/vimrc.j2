@@ -4,11 +4,11 @@ set tabstop=4
 set shiftwidth=4
 set softtabstop=4
 set expandtab
-set autoindent
+set nosmartindent
 set number
 set numberwidth=1
-syntax on
-filetype plugin on
+syntax enable
+filetype plugin indent on
 for scheme in ['apprenctice', 'slate', 'default']
     try
         execute 'colorscheme ' . scheme
@@ -18,11 +18,11 @@ for scheme in ['apprenctice', 'slate', 'default']
 endfor
 
 " Navigation keybindings
-inoremap <A-a> <Esc>
-noremap <A-j> <Home>
-noremap <A-k> <PageDown>
-noremap <A-l> <PageUp>
-noremap <A-;> <End>
+let mapleader = " "
+
+inoremap <C-j> <Esc>
+inoremap <C-f> <C-x><C-o>
+
 noremap j h
 noremap k j
 noremap l k
@@ -57,3 +57,16 @@ augroup two_space
   autocmd FileType jinja,jinja2,htmldjango,yaml setlocal expandtab tabstop=2 softtabstop=2 shiftwidth=2
 augroup END
 
+" Python LSP setup
+set completeopt=menuone,noselect,popup
+
+augroup PythonLSP
+    autocmd!
+    autocmd User LspSetup call LspAddServer([#{ name: 'pylsp', filetype: 'python', path: 'pylsp', args: [] }])
+augroup END
+
+nnoremap <silent> gd :LspGotoDefinition<CR>
+nnoremap <silent> gr :LspShowReferences<CR>
+nnoremap <silent> K :LspHover<CR>
+nnoremap <silent> <leader>rn :LspRename<CR>
+nnoremap <silent> <leader>ca :LspCodeAction<CR>

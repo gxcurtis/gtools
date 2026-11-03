@@ -10,7 +10,7 @@
 
 - name: Make vim plugins directory path
   file: 
-    path: "{{ user.home }}/.vim/pack/plugins/start/lsp"
+    path: "{{ user.home }}/.vim/pack/plugins/start"
     state: directory
     recurse: true
 
@@ -19,5 +19,4 @@
     src: "templates/vim/{{ item.filename }}"
     dest: "~/.vim/templates/{{ item.filename }}"
   loop: "{{ vim_templates }}"
-
 

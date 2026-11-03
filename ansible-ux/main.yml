@@ -26,6 +26,11 @@
         file: tasks/packages.yml
       tags: packages
 
+    - name: Import python tasks
+      import_tasks:
+        file: tasks/python.yml
+      tags: python
+
     - name: Import bash tasks
       import_tasks:
         file: tasks/bash.yml
