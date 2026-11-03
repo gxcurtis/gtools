@@ -13,8 +13,7 @@ timesource --ntp-server={{ server }}
 timesource --ntp-pool={{ pool }}
   {%- endfor %}
 {%- endif %}
-
-{{- interface_type }}
+{{ interface_type }}
 {{ after_install }}
 firstboot --{{ firstboot }}
 eula --{{ eula }}
@@ -23,7 +22,6 @@ eula --{{ eula }}
 repo --name={{ repo.name }} --baseurl={{ repo.baseurl }} {%- if repo.install %} --install{% endif %}
 {%- endif %}
 {%- endfor %}
-
 network --bootproto={{ network.bootproto }} --device={{ network.device }}
 {%- if network.activate %} --activate{% endif %}
 {%- if network.hostname %} --hostname={{ network.hostname }}{% endif %}
@@ -116,7 +114,6 @@ user --name={{ user.name }}
 {%- if user.groups is defined and user.groups %} --groups={{ user.groups | join(' ') }}{% endif %}
 {% if user.sshkey is defined and user.sshkey %}sshkey --username={{ user.name }} "{{ user.sshkey }}"{% endif %}
 {%- endfor %}
-
 %include {{ storage.includefile }}
 
 {% include storage.template -%}
