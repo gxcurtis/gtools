@@ -2,6 +2,6 @@
   template:
     src: templates/Xresources.j2
     dest: "{{ user.home }}/.Xresources"
-  when: "'xterm' in ansible_facts.packages"
+  when: "'xterm' in ansible_facts.packages | default([])"
   notify: Merge xrdb
 

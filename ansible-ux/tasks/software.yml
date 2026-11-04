@@ -1,0 +1,57 @@
+- name: Software block
+  block:
+  - name: Install packages with discovered package manager {{ ansible_pkg_mgr }}
+    set_fact:
+      package_set: >-
+        {% if ansible_pkg_mgr in ['dnf','yum'] %}
+        {{ rpm_packages }}
+        {% elif ansible_pkg_mgr == 'homebrew' %}
+        {{ brew_packages }}
+        {% elif ansible_pkg_mgr == 'apt' %}
+        {{ deb_packages }}
+        {% elif ansible_pkg_mgr == 'pacman' %}
+        {{ pacman_packages }}
+        {% else %}
+        {{ default([]) }}
+        {% endif %}
+      
+  - name: Install packages
+    become: true
+    package:
+      name: "{{ package_set }}"
+      state: present
+
+  - name: Install homebrew packages (MaxOS)
+    homebrew:
+      name: "{{ package_set }}"
+      state: present
+    when: ansible_distribution == 'MacOSX'
+
+  rescue:
+    - name: Rescue message
+      debug:
+        msg: "Couldn't install packages"
+        
+- name: Get package facts
+  package_facts:
+    manager: "{{ ansible_pkg_mgr }}"
+  when: ansible_distribution != 'MacOSX'
+
+- name: Python3 pip block task
+  block:
+    - name: Pip install packages
+      pip:
+        name: "{{ python_packages }}"
+        state: present
+        extra_args: --user
+  rescue:
+    - name: Rescue message
+      debug:
+        msg: "Couldn't pip install packages trying again with explicit executable"
+
+    - name: Pip install packages with executable
+      pip:
+        name: "{{ python_packages }}"
+        state: present
+        extra_args: --user
+        executable: /usr/bin/pip3

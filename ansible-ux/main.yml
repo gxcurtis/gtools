@@ -8,6 +8,7 @@
     - vars/escape_sequences.yml
     - vars/bash_prompts.yml
     - vars/bash_aliases.yml
+    - vars/packages.yml
     - vars/vim.yml
   vars:
     tdir: "../templates"
@@ -21,15 +22,10 @@
           home: "{{ ansible_facts['user_dir'] }}"
       tags: always
 
-    - name: Import package tasks
+    - name: Import software tasks
       import_tasks:
-        file: tasks/packages.yml
-      tags: packages
-
-    - name: Import python tasks
-      import_tasks:
-        file: tasks/python.yml
-      tags: python
+        file: tasks/software.yml
+      tags: software
 
     - name: Import bash tasks
       import_tasks:

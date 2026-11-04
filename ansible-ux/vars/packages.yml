@@ -1,0 +1,31 @@
+---
+brew_packages:
+  - git
+  - vim
+  - bash
+  - bash-completion
+  - bash-completion@2
+  - shellcheck
+  - kitty
+  - xterm
+
+python_packages:
+  - ansible-lint
+  - python-lsp-server
+  - packaging
+  - ruff
+  - pytest
+  - build
+  - setuptools
+  - wheel
+  - requests
+  - bs4
+  - pykickstart
+
+rpm_packages:
+  - git
+  - neovim
+
+apt_packages: []
+
+pacman_packages: []
