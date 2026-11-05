@@ -21,7 +21,7 @@
       name: "{{ package_set }}"
       state: present
 
-  - name: Install homebrew packages (MaxOS)
+  - name: Install homebrew packages (MacOS)
     homebrew:
       name: "{{ package_set }}"
       state: present
