@@ -57,10 +57,16 @@ augroup two_space
   autocmd FileType jinja,jinja2,htmldjango,yaml setlocal expandtab tabstop=2 softtabstop=2 shiftwidth=2
 augroup END
 
-" Enable LSP completion
+augroup ansible_filetype
+    autocmd!
+    autocmd BufRead,BufNewFile */tasks/*.yml,*/tasks/*.yaml set filetype=yaml.ansible
+    autocmd BufRead,BufNewFile */handlers/*.yml,*/handlers/*.yaml set filetype=yaml.ansible
+    autocmd BufRead,BufNewFile */playbooks/*.yml,*/playbooks/*.yaml set filetype=yaml.ansible
+    autocmd BufRead,BufNewFile playbook.yml,site.yml set filetype=yaml.ansible
+augroup END
+" LSP STUFF
 
 let g:lsp_diagnostics_enabled = 1
-
 let g:lsp_diagnostics_echo_cursor = 1
 
 " Python LSP setup
