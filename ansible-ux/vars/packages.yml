@@ -1,14 +1,4 @@
 ---
-brew_packages:
-  - git
-  - vim
-  - bash
-  - bash-completion
-  - bash-completion@2
-  - shellcheck
-  - kitty
-  - xterm
-
 python_packages:
   - ansible-lint
   - python-lsp-server
@@ -22,10 +12,6 @@ python_packages:
   - bs4
   - pykickstart
 
-rpm_packages:
+dnf_packages:
   - git
-  - neovim
 
-apt_packages: []
-
-pacman_packages: []

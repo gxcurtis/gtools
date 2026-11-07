@@ -9,7 +9,7 @@ alias_groups:
       - name: rc
         command: echo $?
       - name: arsync
-        command: rsync -havuHP --stat
+        command: rsync -havuHP --stats
       - name: sdverify
         command: systemd-analyze verify
       - name: ip4

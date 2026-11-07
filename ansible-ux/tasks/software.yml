@@ -1,32 +1,11 @@
 - name: Software block
   block:
-  - name: Install packages with discovered package manager {{ ansible_pkg_mgr }}
-    set_fact:
-      package_set: >-
-        {% if ansible_pkg_mgr in ['dnf','yum'] %}
-        {{ rpm_packages }}
-        {% elif ansible_pkg_mgr == 'homebrew' %}
-        {{ brew_packages }}
-        {% elif ansible_pkg_mgr == 'apt' %}
-        {{ deb_packages }}
-        {% elif ansible_pkg_mgr == 'pacman' %}
-        {{ pacman_packages }}
-        {% else %}
-        {{ default([]) }}
-        {% endif %}
-      
-  - name: Install packages
-    become: true
-    package:
-      name: "{{ package_set }}"
-      state: present
-
-  - name: Install homebrew packages (MacOS)
-    homebrew:
-      name: "{{ package_set }}"
-      state: present
-    when: ansible_distribution == 'MacOSX'
-
+    - name: Install dnf packages
+      become: true
+      dnf:
+        name: "{{ dnf_packages }}"
+        state: present
+      when: ansible_facts['os_family'] == 'RedHat'
   rescue:
     - name: Rescue message
       debug:
@@ -34,8 +13,8 @@
         
 - name: Get package facts
   package_facts:
-    manager: "{{ ansible_pkg_mgr }}"
-  when: ansible_distribution != 'MacOSX'
+    manager: auto
+  when: ansible_facts['distribution'] != 'MacOSX'
 
 - name: Python3 pip block task
   block:

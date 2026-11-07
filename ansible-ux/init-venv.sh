@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-cd "$(dirname -- ${BASH_SOURCE[0]})"
+cd "$(dirname -- "${BASH_SOURCE[0]}")" || exit 1
 
 if ! command -v python3 > /dev/null; then
   echo "Python3 unavailable..."
