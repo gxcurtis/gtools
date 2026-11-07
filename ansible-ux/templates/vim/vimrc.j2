@@ -64,30 +64,39 @@ augroup ansible_filetype
     autocmd BufRead,BufNewFile */playbooks/*.yml,*/playbooks/*.yaml set filetype=yaml.ansible
     autocmd BufRead,BufNewFile playbook.yml,site.yml set filetype=yaml.ansible
 augroup END
-" LSP STUFF
 
+" LSP Settings
 let g:lsp_diagnostics_enabled = 1
 let g:lsp_diagnostics_echo_cursor = 1
-
-" Python LSP setup
 set completeopt=menuone,noselect,popup
 
 " Navigate popup menus
 inoremap <expr> <Tab> pumvisible() ? "\<C-n>" : "\<Tab>"
 inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
+inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<CR>"
 noremap <expr> <C-f> lsp#scroll(+4)
 noremap <expr> <C-d> lsp#scroll(-4)
 
-" Accept selected completion
-inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<CR>"
-
-augroup PythonLSP
-    autocmd!
-    autocmd User LspSetup call LspAddServer([#{ name: 'pylsp', filetype: 'python', path: 'pylsp', args: [] }])
-augroup END
-
+" Shortcuts
 nnoremap <silent> gd :LspGotoDefinition<CR>
 nnoremap <silent> gr :LspShowReferences<CR>
 nnoremap <silent> K :LspHover<CR>
 nnoremap <silent> <leader>rn :LspRename<CR>
 nnoremap <silent> <leader>ca :LspCodeAction<CR>
+
+" Python Language Server
+augroup PythonLSP
+    autocmd!
+    autocmd User LspSetup call LspAddServer([#{ name: 'pylsp', filetype: 'python', path: 'pylsp', args: [] }])
+augroup END
+
+" Ansible Language Server
+if executable('ansible-language-server')
+    au User lsp_setup call lsp#register_server({
+        \ 'name': 'ansible-language-server',
+        \ 'cmd': {server_info->['ansible-language-server', '--stdio']},
+        \ 'allowlist': ['yaml.ansible'],
+        \ 'languageId': {server_info->'ansible'},
+        \ })
+endif
+
