@@ -12,7 +12,7 @@ gitm() {
 # Message border spanning terminal width
 msgborder() {
     local OPTIND=1
-    local OPTARG opt line padding
+    local OPTARG opt line
     local char='='
     local color=15
     local width="$COLUMNS"
@@ -41,9 +41,7 @@ msgborder() {
         printf -v line '%*s' "$width" ''
         printf '\033[38;5;%sm%s\033[0m\n' "$color" "${line// /$char}"
     else
-{% raw %}
         width=$((width - ${#msg} - 1))
-{% endraw %}
         printf -v line '%*s' "$width" ''
         printf '\033[38;5;%sm%s ' "$color" "$msg"
         printf '%s\033[0m\n' "${line// /$char}"

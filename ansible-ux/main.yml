@@ -4,16 +4,6 @@
   become: false
   gather_facts: true
   connection: local
-  vars_files:
-    - vars/escape_sequences.yml
-    - vars/bash_prompts.yml
-    - vars/bash_aliases.yml
-    - vars/packages.yml
-    - vars/vim.yml
-  vars:
-    tdir: "../templates"
-    font_dir: "{{ ansible_facts['user_dir'] }}/.local/share/fonts"
-
   tasks:
     - name: Set environment facts
       set_fact:
@@ -26,6 +16,11 @@
       import_tasks:
         file: tasks/software.yml
       tags: software
+
+    - name: Import tools tasks
+      import_tasks:
+        file: tasks/tools.yml
+      tags: tools
 
     - name: Import bash tasks
       import_tasks:
@@ -51,14 +46,13 @@
         file: tasks/xterm.yml
       tags: xterm
 
-    - name: Import miscellaneous tasks
-      import_tasks:
-        file: tasks/misc.yml
-      tags: misc
+    - name: Import fonts tasks
+      include_tasks:
+        file: tasks/fonts.yml
+      loop:
+        - JetBrainsMono
+        - Hack
+      loop_control:
+        loop_var: font
+      tags: fonts
 
-  handlers:
-    - name: Merge xrdb
-      command: xrdb -merge {{ user.home }}/.Xresources 
-
-    - name: Refresh font cache
-      command: fc-cache -f {{ font_dir }}/JetBrainsMono

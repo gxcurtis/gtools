@@ -1,0 +1,4 @@
+---
+python_bash_completion_targets:
+  - ksbuilder
+  - snappy

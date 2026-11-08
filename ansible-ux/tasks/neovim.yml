@@ -5,7 +5,7 @@
 
 - name: Copy init.lua to user nvim directory
   template:
-    src: ../templates/neovim/init.lua.j2
+    src: ../templates/init.lua.j2
     dest: "{{ user.home }}/.config/nvim/init.lua"
 
 - name: Remove init.vim

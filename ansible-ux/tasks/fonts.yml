@@ -1,0 +1,30 @@
+- name: Create user font directories
+  file:
+    path: "{{ user.home }}/.local/share/fonts/{{ font }}"
+    state: directory
+    mode: "0750"
+  tags: fonts
+
+- name: Find ttf font files
+  find:
+    paths: "{{ playbook_dir }}/files/fonts/{{ font }}"
+    patterns:
+      - '*.ttf'
+    file_type: file
+  register: ttf_fonts
+  tags: fonts
+
+- name: Add ttf font files
+  copy:
+    src: "{{ item['path'] }}"
+    dest: "{{ user.home }}/.local/share/fonts/{{ font }}"
+    mode: "0640"
+  loop: "{{ ttf_fonts['files'] }}"
+  loop_control:
+    label: "{{ item['path'] | basename }}"
+  register: copy_fonts
+  tags: fonts
+
+- name: Refresh font cache
+  command: fc-cache -f {{ user.home }}/.local/share/fonts/{{ font }}
+  when: copy_fonts.changed

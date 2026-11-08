@@ -1,0 +1,4 @@
+bash_variables:
+  virtual_env_disable_prompt: '1'
+  libvirt_default_uri: 'qemu:///system'
+  editor: 'vim'

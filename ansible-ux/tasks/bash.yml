@@ -1,3 +1,12 @@
+- name: Include bash vars
+  include_vars:
+    file: "{{ playbook_dir }}/vars/{{ item }}.yml"
+  loop:
+    - escape-sequences
+    - bash-prompts
+    - bash-aliases
+    - bash-variables
+
 - name: Create home .bashrc.d inclusion directory
   file:
     path: "{{ user.home }}/.bashrc.d"
@@ -14,15 +23,17 @@
     path: "{{ user.home }}/.bashrc"
     state: present
 
-- name: Add bashrc template files
+- name: Add bash prompt template
   template:
-    src: templates/{{ item }}.j2
-    dest: "{{ user.home }}/.bashrc.d/{{ item }}"
+    src: templates/prompt.bash.j2
+    dest: "{{ user.home }}/.bashrc.d/prompt.bash"
     mode: "0640"
-    backup: true
-  loop:
-    - prompt.bash
-    - functions.bash
+
+- name: Add bash functions to user environment
+  copy:
+    src: files/functions.bash
+    dest: "{{ user.home }}/.bashrc.d/functions.bash"
+    mode: "0640"
 
 - name: Add bash variables to user environment
   copy:
@@ -45,23 +56,6 @@
       {% endfor %}
 
       {% endfor %}
-    dest: "{{ user.home }}/.bashrc.d/variables.bash"
+    dest: "{{ user.home }}/.bashrc.d/aliases.bash"
     mode: "0640"
 
-- name: Create user bash completions directory
-  file:
-    state: directory
-    path: "{{ user.home }}/.local/share/bash-completion/completions"
-    mode: "0640"
-
-- name: Register ksbuilder autocompletion
-  ansible.builtin.command:
-    cmd: "register-python-argcomplete ksbuilder"
-  register: argcomplete_ksbuilder
-  changed_when: false
-
-- name: Install Python completion scripts
-  ansible.builtin.copy:
-    content: "{{ argcomplete_ksbuilder.stdout }}\n"
-    dest: "{{ user.home }}/.local/share/bash-completion/completions/ksbuilder"
-    mode: "0750"

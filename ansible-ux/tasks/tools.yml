@@ -1,0 +1,41 @@
+- name: Include argcompletes vars
+  include_vars:
+    file: "{{ playbook_dir }}/vars/argcompletes.yml"
+
+- name: Create user dot bin directory
+  file:
+    state: directory
+    path: "{{ user.home }}/.local/bin"
+
+- name: Symlink project tools to user dot bin directory
+  file:
+    src: "{{ item | realpath }}"
+    dest: "{{ user.home }}/.local/bin/{{ item | basename | splitext | first }}"
+    state: link
+  loop:
+    - "{{ playbook_dir }}/../ksbuilder/ksbuilder.py"
+    - "{{ playbook_dir }}/../snappy/snappy.py"
+    - "{{ playbook_dir }}/../buildaboot/build-bootdev.sh"
+    - "{{ playbook_dir }}/../setup-ux.sh"
+
+- name: Create user bash completions directory
+  file:
+    state: directory
+    path: "{{ user.home }}/.local/share/bash-completion/completions"
+    mode: "0750"
+
+- name: Register ksbuilder autocompletion
+  ansible.builtin.command:
+    cmd: "register-python-argcomplete {{ item }}"
+  loop: "{{ python_bash_completion_targets }}"
+  register: argcompletes
+  changed_when: false
+
+- name: Install python bash completion scripts
+  ansible.builtin.copy:
+    content: "{{ item['stdout'] }}\n"
+    dest: "{{ user.home }}/.local/share/bash-completion/completions/{{ item['item'] }}"
+    mode: "0750"
+  loop: "{{ argcompletes['results'] }}"
+  loop_control:
+    label: "{{ item['item'] }}"

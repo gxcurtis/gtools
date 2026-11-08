@@ -1,7 +1,12 @@
-- name: Add Xterm Xresources
-  template:
-    src: templates/Xresources.j2
-    dest: "{{ user.home }}/.Xresources"
+- name: Xterm task block
   when: "'xterm' in ansible_facts.packages | default([])"
-  notify: Merge xrdb
-
+  block:
+    - name: Add Xterm Xresources
+      template:
+        src: templates/Xresources.j2
+        dest: "{{ user.home }}/.Xresources"
+      register: xresources
+    
+    - name: Merge Xresources
+      command: "xrdb -merge {{ user.home }}/.Xresources"
+      when: xresources.changed

@@ -1,6 +1,10 @@
+- name: Include vim vars
+  include_vars:
+    file: "{{ playbook_dir }}/vars/vim.yml"
+
 - name: Add vimrc config
   template:
-    src: templates/vim/vimrc.j2
+    src: templates/vimrc.j2
     dest: "{{ user.home }}/.vimrc"
 
 - name: Make vim templates directory
@@ -14,9 +18,9 @@
     state: directory
     recurse: true
 
-- name: Add vim templates
-  template:
-    src: "templates/vim/{{ item.filename }}"
+- name: Add vim text templates
+  copy:
+    src: "{{ playbook_dir }}/files/vim/{{ item.filename }}"
     dest: "~/.vim/templates/{{ item.filename }}"
   loop: "{{ vim_templates }}"
 

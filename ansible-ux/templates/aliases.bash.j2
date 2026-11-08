@@ -1,9 +1,0 @@
-# Aliases
-
-{% for group in alias_groups %}
-# {{ group.name }}
-{% for alias in group.aliases %}
-alias {{ alias.name }}='{{ alias.command }}'
-{% endfor %}
-
-{% endfor %}
