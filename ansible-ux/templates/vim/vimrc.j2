@@ -91,12 +91,12 @@ augroup PythonLSP
 augroup END
 
 " Ansible Language Server
-if executable('ansible-language-server')
-    au User lsp_setup call lsp#register_server({
-        \ 'name': 'ansible-language-server',
-        \ 'cmd': {server_info->['ansible-language-server', '--stdio']},
-        \ 'allowlist': ['yaml.ansible'],
-        \ 'languageId': {server_info->'ansible'},
-        \ })
-endif
+"if executable('ansible-language-server')
+"    au User lsp_setup call lsp#register_server({
+"        \ 'name': 'ansible-language-server',
+"        \ 'cmd': {server_info->['ansible-language-server', '--stdio']},
+"        \ 'allowlist': ['yaml.ansible'],
+"        \ 'languageId': {server_info->'ansible'},
+"        \ })
+"endif
 

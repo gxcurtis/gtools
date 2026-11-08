@@ -3,6 +3,7 @@
     path: "{{ user.home }}/.bashrc.d"
     state: directory
     owner: "{{ user.name }}"
+    mode: "0750"
 
 - name: Add inclusion logic for custom bash files
   blockinfile:
@@ -12,22 +13,46 @@
       done
     path: "{{ user.home }}/.bashrc"
     state: present
-            
+
 - name: Add bashrc template files
   template:
     src: templates/{{ item }}.j2
     dest: "{{ user.home }}/.bashrc.d/{{ item }}"
+    mode: "0640"
     backup: true
   loop:
     - prompt.bash
-    - aliases.bash
     - functions.bash
-    - variables.bash
+
+- name: Add bash variables to user environment
+  copy:
+    content: |
+      # Extra Bash Variables
+      {% for key, value in bash_variables.items() %}
+      export {{ key | upper }}={{ value }}
+      {% endfor %}
+    dest: "{{ user.home }}/.bashrc.d/variables.bash"
+    mode: "0640"
+
+- name: Add bash aliases to user environment
+  copy:
+    content: |
+      # Extra Bash Aliases
+      {% for group in alias_groups %}
+      # {{ group.name }}
+      {% for alias in group.aliases %}
+      alias {{ alias.name }}='{{ alias.command }}'
+      {% endfor %}
+
+      {% endfor %}
+    dest: "{{ user.home }}/.bashrc.d/variables.bash"
+    mode: "0640"
 
 - name: Create user bash completions directory
   file:
     state: directory
     path: "{{ user.home }}/.local/share/bash-completion/completions"
+    mode: "0640"
 
 - name: Register ksbuilder autocompletion
   ansible.builtin.command:
@@ -39,4 +64,4 @@
   ansible.builtin.copy:
     content: "{{ argcomplete_ksbuilder.stdout }}\n"
     dest: "{{ user.home }}/.local/share/bash-completion/completions/ksbuilder"
-
+    mode: "0750"
