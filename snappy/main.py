@@ -1,5 +1,6 @@
 import argparse
 import sys
+from pathlib import Path
 from .virtual_machine import VirtualMachine
 from .logical_volume import LogicalVolume
 
@@ -35,45 +36,47 @@ def main():
 
         # Commit execution branch
         if args.commit:
-            # Set instance specific attributes 
             if isinstance(target, VirtualMachine):
-                #target.set_disk()
-                pass
+                target.snapshot.commit_commands = (
+                    ("virsh", "blockcommit", target.domain, target.overlay_path, "--pivot", "--shallow"),
+                    ("virsh", "snapshot-list", target.domain),
+                    ("virsh", "domblklist", target.domain)
+                )
             elif isinstance(target, LogicalVolume):
-                #target.set_size()
                 pass
             else:
                 pass
 
-            target.set_commit_commands()
             target.snapshot.commit(target)
 
         # Revert execution branch
         elif args.revert:
-            # Set instance specific attributes 
             if isinstance(target, VirtualMachine):
-                pass
+                target.write_reverted_xml(f"/tmp/{target.domain}-reverted.xml")
+                target.snapshot.revert_commands = (
+                    ("virsh", "destroy", target.domain),
+                    ("virsh", "define", str(target.tmp_xml_path),
+                    ("virsh", "snapshot-list", target.domain),
+                    ("virsh", "domblklist", target.domain)
             elif isinstance(target, LogicalVolume):
                 pass
             else:
                 pass
 
-            target.set_revert_commands()
             target.snapshot.revert(target)
 
         # Create execution branch
         else:
-            # Set instance specific attributes 
             if isinstance(target, VirtualMachine):
-                pass
+                target.set_create_commands = (
+                    ("virsh", "snapshot-create-as", target.domain, target.snapshot.name, "--disk-only", "--atomic"),
+                    ("virsh", "snapshot-list", target.domain),
+                    ("virsh", "domblklist", target.domain)
+                )
             elif isinstance(target, LogicalVolume):
                 pass
             else:
                 pass
-
-            target.set_create_commands(
-                ("virsh", "snapshot-create-as", self.domain, self.snapshot.name, "--disk-only", "--atomic")
-            )
 
             target.snapshot.create(target)
 

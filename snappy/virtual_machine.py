@@ -7,6 +7,7 @@ class VirtualMachine:
     def __init__(self, domain: str):
         self.domain = domain
         self.snapshot = SnapshotManager()
+        self.overlay_path = None
 
     def dumpxml(self, inactive=True):
         cmd_args = ["virsh", "dumpxml", self.domain]
@@ -17,18 +18,5 @@ class VirtualMachine:
 
         return result.stdout
 
-    def set_create_commands(self):
-        commands = []
-
-        self.snapshot.create_commands = commands
-
-    def set_commit_commands(self):
-        commands = []
-
-        self.snapshot.commit_commands = commands
-
-    def set_revert_commands(self):
-        commands = []
-        
-        self.snapshot.revert_commands = commands
-        
+    def write_reverted_xml(self):
+        pass
