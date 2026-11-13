@@ -1,15 +1,34 @@
 ---
 collections:
   - name: ansible.posix
+  - name: ansible.netcommon
+  - name: ansible.utils
   - name: community.general
   - name: community.crypto
   - name: fedora.linux_system_roles
   - name: everpure.flashblade
   - name: everpure.flasharray
+  - name: cisco.ios
+  - name: cisco.nxos
+  - name: arista.eos
 
 roles:
   - name: ansible-lockdown.rhel10_stig
   - name: ansible-lockdown.rhel9_stig
   - name: ansible-lockdown.rhel8_stig
   - name: ansible-lockdown.rhel7_stig
+  - name: geerlingguy.apache
+  - name: geerlingguy.certbot
+  - name: geerlingguy.clamav
+  - name: geerlingguy.nginx
+  - name: geerlingguy.ntp
+  - name: geerlingguy.nfs
+  - name: geerlingguy.docker
+  - name: geerlingguy.containerd
+  - name: geerlingguy.kubernetes
+  - name: geerlingguy.postfix
+  - name: geerlingguy.postgresql
+  - name: geerlingguy.gitlab
+
+
 
