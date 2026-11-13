@@ -1,0 +1,15 @@
+---
+collections:
+  - name: ansible.posix
+  - name: community.general
+  - name: community.crypto
+  - name: fedora.linux_system_roles
+  - name: everpure.flashblade
+  - name: everpure.flasharray
+
+roles:
+  - name: ansible-lockdown.rhel10_stig
+  - name: ansible-lockdown.rhel9_stig
+  - name: ansible-lockdown.rhel8_stig
+  - name: ansible-lockdown.rhel7_stig
+
