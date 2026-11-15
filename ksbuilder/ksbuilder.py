@@ -245,10 +245,7 @@ kickstart_defaults = {
     },
     "bootloader": {
         "location": "mbr",        
-        "args": [
-            "console=tty0",
-            "console=ttyS0,115200n8"
-        ],
+        "args": [],
         "iscrypted": True,
         "password": "",
         "superuser": "root"
