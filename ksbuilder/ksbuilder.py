@@ -46,8 +46,8 @@ def build_parser():
     parser.add_argument("--grub-password", nargs="?", const=True, metavar="GRUB_PASSWORD_HASH", help="Encrypted GRUB password hash or leave blank to be prompted")
     parser.add_argument("--luks-password", nargs="?", const=True, help="Plaintext LUKS password or leave blank to be prompted")
     parser.add_argument("--user-passwords", action="store_true", help="Prompt for users defined in kickstat")
-    parser.add_argument("--interface-type", nargs=1, choices=["graphical", "text", "cmdline"], help="Specify interface type during installation")
-    parser.add_argument("--after-install", nargs=1, choices=["reboot", "poweroff", "shutdown", "halt"], help="Specify system action after installion ends")
+    parser.add_argument("--interface-type", choices=["graphical", "text", "cmdline"], help="Specify interface type during installation")
+    parser.add_argument("--after-install", choices=["reboot", "poweroff", "shutdown", "halt"], help="Specify system action after installion ends")
 
     if validation_available:
         parser.add_argument(
@@ -164,7 +164,7 @@ def add_stig_defaults(ksdata: dict):
         ksdata["network"]["ipv6"]["enabled"] = False
         ksdata["network"]["nameservers"] += ["9.9.9.9","8.8.8.8","1.1.1.1"]
         ksdata["firewall"]["system_defaults"] = False
-        ksdata["firewall"]["zone"] = "drop",
+        ksdata["firewall"]["zone"] = "drop"
         ksdata["storage"]["luks_passphrase"] = "install"
         ksdata["openscap"]["hardening"] = True
 

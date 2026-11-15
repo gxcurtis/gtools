@@ -10,12 +10,11 @@ eula --agreed
 network --bootproto=dhcp --device=link --activate
 firewall --enable --use-system-defaults
 
-selinux --enforcing
-rootpw --iscrypted $6$Gdzm1MhHOTdnrcLA$1PbhvHTxZrfthfxLNQLOcTHm6dsao/hytGFIcVF64esVI7mW/dLM/dT0G2LA2K91M1Twxn.mwbHvEKUNfAAc..
+rootpw --iscrypted $6$usUN4E78ZA.Fkik.$euyecIiBQChSmOx/SY27dy.4TXSfcgui6Tvvudg8SwPxIRyuOGKZM21tjI.1CA.lqtH8mt.A8eHQdBmlkCwUL/
  
-bootloader --location=mbr --append="console=tty0 console=ttyS0,115200n8"
+bootloader --location=mbr
 
-user --name=ansible --password=$6$biUXWSDvw/JnEGS7$CzgloyoNC/eodbSxl9q/a3F/O1TyBOoa0uSkPSTkgq6V99HViMIvTWVgaL1VV3V9o3MtasNpWsnUh..uzZ3Ol1 --iscrypted --homedir=/home/ansible --shell=/bin/bash --gecos='Ansible Admin' --groups=wheel
+user --name=ansible --password=$6$cNic6m3yEZltkr5W$WNextPJuUjmkrIyIDfu0kKNZpyCk3CW4SdydWKXh.fp/m43Y.qxWdJlFq8ukLMXwqFg3VnLphk5faEd796.kd1 --iscrypted --homedir=/home/ansible --shell=/bin/bash --gecos='Ansible Admin' --groups=wheel
 
 %include /tmp/part-include
 
@@ -23,7 +22,6 @@ user --name=ansible --password=$6$biUXWSDvw/JnEGS7$CzgloyoNC/eodbSxl9q/a3F/O1TyB
 
 partfile="/tmp/part-include"
 ignore_label=INSTALL
-vgname=os
 
 # Sizes in MiB
 bootefi_size=600
@@ -88,24 +86,9 @@ fi
 
 %packages --ignoremissing
 @core
-ansible-core
 bash-completion
-bind-utils
-curl
-git
-info
 man-db
 man-pages
-nfs-utils
-nmap-ncat
-openscap-scanner
-openssl
-policycoreutils-python-utils
-python3
-python3-pip
-rsync
-scap-security-guide
-tcpdump
 tmux
 vim-enhanced
 
@@ -113,7 +96,7 @@ vim-enhanced
 
 %post --interpreter=/usr/bin/bash --log=/root/post-kickstart.log
 
-systemctl enable serial-getty@ttyS0.service
+echo "Hello World!"
 
 %end
 
