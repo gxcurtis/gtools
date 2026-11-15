@@ -1,25 +1,87 @@
 import argparse
+import subprocess
 import sys
+import xml.etree.ElementTree as ET
+from xml.etree.ElementTree import Element
 from pathlib import Path
-from .virtual_machine import VirtualMachine
+
+class VirtualMachine:
+    def __init__(self, domain: str):
+        self.domain = domain
+        self.backing_chain()
+
+    def dumpxml(self, xpath=None):
+        cmd = ["virsh", "dumpxml", self.domain]
+
+        if xpath:
+            cmd.extend("--xpath", xpath)
+
+        result = run(*cmd).stdout
+
+        return result.stdout
+
+    def get_disk_xml(self, disk):
+        xml_disks = ET.fromstring(self.dumpxml(xpath='devices/disk'))
+        pass
+
+    def update_backing_chain(self, disk_xml: Element):
+        if not (backing_store := disk_xml.find("backingStore")):
+            pass
+
+       
+        
+
+            
+            
+        
+    def create_snapshot(self, snapshot_name, disk_only=True, atomic=True):
+        cmd = [ 
+            "virsh",
+            "snapshot-create-as",
+            self.domain,
+            snapshot_name 
+        ]    
+        
+        if disk_only:
+            cmd.append("--disk-only")
+
+        if atomic:
+            cmd.append("--atomic")
+
+        return run(*cmd, capture=False)
+
+    def commit_snapshot(self, snapshot_name, pivot=True)
+        cmd = [
+            "virsh",
+            "blockcommit",
+            self.domain,
+        ]
 
 def build_parser():
     parser = argparse.ArgumentParser()
 
-    # Top level args
-    parser.add_argument("-n", "--snapshot-name", default="snappy", help="Specify snapshot or overlay name (default: snappy)")
-    action_group = parser.add_mutually_exclusive_group()
-    action_group.add_argument("-C", "--commit", action="store_true", help="COMMIT and remove snapshot changes to source target")
-    action_group.add_argument("-R", "--revert", action="store_true", help="REVERT and remove snapshot changes to source target")
+    parser.add_argument("snapshot_cmd", choices=["create", "commit", "revert"], help="Snapshot command")
 
-    # Second level subcommands
-    subparsers = parser.add_subparsers(dest="snapshot_type", required=True)
-    virt_parser = subparsers.add_parser("virt")
+    parser.add_argument("-s", "--snapshot-name", default="snappy", help="Specify snapshot name (default: snappy)")
 
-    # Third level virtual machine args
-    virt_parser.add_argument("vm", type=VirtualMachine, nargs="+", dest="vm", help="Name of virtual machines to snapshot")
+    parser.add_argument("vms", nargs="+", type=VirtualMachine, help="QEMU/KVM Virtual Machines")
 
     return parser
+
+def run(*args, capture=True, check=True **kwargs):
+    if capture:
+        if sys.version_info >= (3,8):
+            kwargs["capture_output"] = True
+            kwargs["text"] = True
+        else:
+            kwargs["stdout"] = subprocess.PIPE
+            kwargs["stderr"] = subprocess.PIPE
+            kwargs["universal_newlines"] = True
+
+    try:
+        return subprocess.run(["sudo", *args], check=check, **kwargs)
+    except subprocess.CalledProcessError as e:
+        sys.exit(e.stderr)
 
 ##########
 ## MAIN ##
@@ -28,52 +90,6 @@ def build_parser():
 def main():
     parser = build_parser()
     args = parser.parse_args()
-
-    for target in args.snapshot_targets():
-        target.snapshot.name = args.snapshot_name
-
-        # Commit execution branch
-        if args.commit:
-            if isinstance(target, VirtualMachine):
-                target.snapshot.commit_commands = (
-                    ("virsh", "blockcommit", target.domain, target.overlay_path, "--pivot", "--shallow"),
-                    ("virsh", "snapshot-list", target.domain),
-                    ("virsh", "domblklist", target.domain)
-                )
-
-        target.snapshot.commit(target)
-
-        # Revert execution branch
-        elif args.revert:
-            if isinstance(target, VirtualMachine):
-                target.write_reverted_xml(f"/tmp/{target.domain}-reverted.xml")
-                target.snapshot.revert_commands = (
-                    ("virsh", "destroy", target.domain),
-                    ("virsh", "define", str(target.tmp_xml_path),
-                    ("virsh", "snapshot-list", target.domain),
-                    ("virsh", "domblklist", target.domain)
-            elif isinstance(target, LogicalVolume):
-                pass
-            else:
-                pass
-
-            target.snapshot.revert(target)
-
-        # Create execution branch
-        else:
-            if isinstance(target, VirtualMachine):
-                target.set_create_commands = (
-                    ("virsh", "snapshot-create-as", target.domain, target.snapshot.name, "--disk-only", "--atomic"),
-                    ("virsh", "snapshot-list", target.domain),
-                    ("virsh", "domblklist", target.domain)
-                )
-            elif isinstance(target, LogicalVolume):
-                pass
-            else:
-                pass
-
-            target.snapshot.create(target)
-
 
 if __name__ == "__main__":
    sys.exit(main()) 

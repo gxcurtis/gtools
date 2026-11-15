@@ -1,10 +1,18 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-usage() {
-  echo
-  echo "Usage: sudo $SCRIPT <device> (e.g. /dev/sdX /dev/loopX)"
-  exit 1
+display_help() {
+    cat <<EOF
+# Build-a-boot script
+# Create bootable installation media image, non ISO9660
+
+Usage: sudo $SCRIPT <device> (e.g. /dev/sdX /dev/loopX)"
+
+Options:
+    • -h (Display this help text)
+    • -L LABEL (Set filesystem label)
+
+EOF
 }
 
 dependencies_installed() {
@@ -190,15 +198,16 @@ EFI_BOOT_DIR="$ESP_MOUNTPOINT/EFI/BOOT"
 GRUB_DIR="$DATA_MOUNTPOINT/boot/grub2"
 RESOURCE_DIR="$DATA_MOUNTPOINT/resources/"
 DISTRO_DIRS=(
-  rhel/{7..10}
+  rhel/{8..10}
   rocky/{8..10}
   centos/{8..10}
-  fedora
+  fedora/latest
 )
 
-while getopts ':L:' opt; do
+while getopts ':L:h' opt; do
     case "$opt" in
-        L)  DATA_LABEL="$OPTARG";;
+        h) display_help && exit 0;; 
+        L) DATA_LABEL="$OPTARG";;
         :) printf 'Missing argument -%s' "$OPTARG" ;;
         \?) printf 'Invalid argument -%s' "$OPTARG" ;;
     esac
@@ -210,13 +219,13 @@ DEV="${1:-}"
 
 if [[ -z "$DEV" ]]; then
   echo "Missing <device> argument."
-  usage
+  exit 1
 elif [[ ! -b "$DEV" ]]; then
   echo "Invalid block device $DEV"
-  usage
+  exit 1
 elif [[ "$EUID" -ne 0 ]]; then
-  echo "Must run as root (sudo)."
-  usage
+  echo "Run as root (sudo)."
+  exit 1
 elif ! dependencies_installed; then
   echo "Package dependencies not installed. Aborting..."
   exit 1
@@ -243,8 +252,11 @@ else
 
   chmod -R u+rwX,g+rwX,o+rX "$DATA_MOUNTPOINT/"
   chown -R root:wheel "$DATA_MOUNTPOINT/"
-  echo
+  if [[ "$DATA_LABEL" != "INSTALL" ]]; then
+    find "$RESOURCE_DIR" "$GRUB_DIR" -type f -exec sed -i "s/INSTALL/$DATA_LABEL/g" {} +
+  fi
 
+  echo
   printf "Boot device setup.\n\n"
   lsblk -o name,size,type,mountpoint,label "$DEV"
   echo
