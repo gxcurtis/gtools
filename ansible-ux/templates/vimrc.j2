@@ -46,11 +46,6 @@ command! Ansiblelint execute '!ansible-lint ' . shellescape(expand('%:p'))
 command! {{ vt.cmd_name | title }} execute 'read' fnameescape(expand('~/.vim/templates/{{ vt.filename }}'))
 {% endfor %}
 
-" Auto commands
-autocmd BufNewFile *.{yml,yaml} call append(0, '---')
-autocmd BufNewFile *.{sh,bash} call append(0, '#!/usr/bin/env bash')
-autocmd BufNewFile *.py call append(0, '#!/usr/bin/env python3')
-
 augroup two_space
   autocmd!
   autocmd BufRead,BufNewFile *.j2 setfiletype jinja
