@@ -4,6 +4,8 @@ vim_template_dir: ~/.vim/templates
 vim_templates:
   - cmd_name: Getopts
     filename: getopts.sh
+  - cmd_name: NewBashCLI
+    filename: new_bash_cli.sh
   - cmd_name: Sdservice
     filename: systemd.service
   - cmd_name: Sdoneshot
