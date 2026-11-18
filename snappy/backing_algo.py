@@ -12,7 +12,17 @@ def print_xml(el: Element):
     ET.ElementTree(el).write(sys.stdout, encoding="unicode")
     print()
 
-def update_backing(disk: Element):
+def update_backing(backing_xml: Element):
+    backing_src = backing_xml.find('backingStore/source')
+
+    if backing_src is None:
+        return backing_xml
+
+    backing_file = backing_src.get("file")
+
+
+                update_backing(backing_store)
+
     source = disk.find("backingStore").find("source")
     if (backingfile := source.get("file")) is not None:
 
