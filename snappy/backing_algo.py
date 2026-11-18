@@ -12,21 +12,28 @@ def print_xml(el: Element):
     ET.ElementTree(el).write(sys.stdout, encoding="unicode")
     print()
 
-def update_backing(backing_xml: Element):
-    backing_src = backing_xml.find('backingStore/source')
+def update_backing(node: Element):
+    source = node.find("source")
+    backing_store = node.find("backingStore")
 
-    if backing_src is None:
-        return backing_xml
+    if backing_store is None or len(backing_store) == 0:
+        return node
 
-    backing_file = backing_src.get("file")
+    backing_source = backing_store.find("source")
+    backing_file = backing_source.get("file")
 
+    child_node = backing_store.find("backingStore")
+   
+    source.set("file", backing_file)
+    node.remove(backing_store)
 
-                update_backing(backing_store)
+    if child_node is None or len(child_node) == 0:
+        node.append(Element("backingStore"))
+    else:
+        node.append(child_node)
 
-    source = disk.find("backingStore").find("source")
-    if (backingfile := source.get("file")) is not None:
+    return node
 
-    
 vm = VirtualMachine("vm")
 vm_xml = vm.dumpxml()
 
@@ -41,13 +48,8 @@ disks = root.findall('devices/disk')
 for disk in disks:
     print_xml(disk)
     print()
-    source = disk.find("backingStore").find("source")
-    if (backingfile := source.get("file")) is not None: 
-        disk.find("source").set("file", backingfile)
-        disk.remove(disk.find("backingStore"))
-        print_xml(disk)
-    else:
-        print("backingStore not found")
+    update_backing(disk)
+    print_xml(disk)
 
 
 
