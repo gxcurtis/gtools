@@ -22,13 +22,10 @@ roles:
   - name: geerlingguy.certbot
   - name: geerlingguy.clamav
   - name: geerlingguy.nginx
-  - name: geerlingguy.ntp
   - name: geerlingguy.nfs
   - name: geerlingguy.docker
   - name: geerlingguy.containerd
   - name: geerlingguy.kubernetes
-  - name: geerlingguy.postfix
-  - name: geerlingguy.postgresql
   - name: geerlingguy.gitlab
 
 
