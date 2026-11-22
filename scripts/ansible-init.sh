@@ -55,6 +55,7 @@ make_dirs() {
 make_files() {
     for s in vault become connection; do
         touch "$PROJECT_DIR/.secrets/$s-pass"
+        chmod 600 "$PROJECT_DIR/.secrets/$s-pass"
     done
 
     cat > "$PROJECT_DIR"/ansible.cfg <<EOF
@@ -65,17 +66,18 @@ deprecation_warnings = false
 display_ok_hosts = true
 display_skipped_hosts = false
 display_args_to_stdout = false
-ask_pass = false
-ask_vault_pass = false
-ask_become_pass = false
 
 forks = 10
 remote_user = ansible
 editor = vim
 private_key_file = .secrets/ansible_key
-vault_password_file = .secrets/vault-pass
-become_password_file = .secrets/become-pass
-connection_password_file = .secrets/connection-pass
+
+# ask_vault_pass = false
+# vault_password_file = .secrets/vault-pass
+# ask_become_pass = false
+# become_password_file = .secrets/become-pass
+# ask_pass = false
+# connection_password_file = .secrets/connection-pass
 
 inventory = ./inventory:~/.ansible/inventory:/usr/share/ansible/inventory
 roles_path = ./roles:~/.ansible/roles:/usr/share/ansible/roles
@@ -154,6 +156,11 @@ install_requirements() {
     fi
 }
 
+# Change permissions of secrets
+chmod_secrets() {
+    chmod 0700 "$PROJECT_DIR"/.secrets
+    chmod 0600 "$PROJECT_DIR"/.secrets/*
+}
 
 ### Main ###
 
@@ -162,6 +169,7 @@ main() {
     make_files
     setup_ssh_keys
     install_requirements
+    chmod_secrets
 
     exit 0
 }
