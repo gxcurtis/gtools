@@ -63,6 +63,8 @@ make_files() {
 host_key_checking = false
 interpreter_python = auto_silent
 deprecation_warnings = false
+inventory_unparsed_warning = false
+localhost_warning = false
 display_ok_hosts = true
 display_skipped_hosts = false
 display_args_to_stdout = false
@@ -79,11 +81,11 @@ private_key_file = .secrets/ansible_key
 # ask_pass = false
 # connection_password_file = .secrets/connection-pass
 
-inventory = ./inventory:~/.ansible/inventory:/usr/share/ansible/inventory
-roles_path = ./roles:~/.ansible/roles:/usr/share/ansible/roles
-collections_path = ./collections:~/.ansible/collections:/usr/share/ansible/collections
-library = ./library:~/.ansible/library:/usr/share/ansible/library
-module_utils = ./module_utils:~/.ansible/module_utils:/usr/share/ansible/module_utils
+inventory = ./inventory, ~/.ansible/inventory, /usr/share/ansible/inventory
+roles_path = ./roles, ~/.ansible/roles, /usr/share/ansible/roles
+collections_path = ./collections, ~/.ansible/collections, /usr/share/ansible/collections
+library = ./library, ~/.ansible/library, /usr/share/ansible/library
+module_utils = ./module_utils, ~/.ansible/module_utils, /usr/share/ansible/module_utils
 log_path = ansible.log
 
 EOF
@@ -121,7 +123,7 @@ roles:
 
 EOF
 
-    cat > "$PROJECT_DIR"/inventory/hosts.yml <<EOF
+    cat > "$PROJECT_DIR"/inventory/inventory.yml <<EOF
 ---
 all:
   hosts:
