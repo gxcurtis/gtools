@@ -1,6 +1,8 @@
 %post --interpreter=/usr/bin/bash --log=/root/post-kickstart.log
 
 systemctl enable serial-getty@ttyS0.service
+
+echo "ansible ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/ansible
 {%- if bootloader.superuser != 'root' %}
 
 # Reconfigure grub bootloader user from default 'root'

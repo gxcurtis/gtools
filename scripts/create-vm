@@ -18,6 +18,7 @@ options:
     -i (Set secondary install disk)
     -p (Set VM pool)
     -b (Set bridge interface)
+    -H (Set Hardware MAC address)
     -h (Print this help text)
 
 EOF
@@ -31,9 +32,10 @@ DISK=64
 INSTALL_DISK='/storage/vmpool/master.img'
 VMPOOL=vmpool
 BRIDGE=br0
+HWADDR='RANDOM'
 
 # Set Options/Arguments
-while getopts ':o:n:c:m:d:i:p:b:h' opt; do
+while getopts ':o:n:c:m:d:i:p:b:hH:' opt; do
     case "$opt" in
         o) OSVAR="$OPTARG" ;;
         n) VMNAME="$OPTARG" ;;
@@ -43,6 +45,7 @@ while getopts ':o:n:c:m:d:i:p:b:h' opt; do
         i) INSTALL_DISK="$OPTARG" ;;
         p) VMPOOL="$OPTARG" ;;
         b) BRIDGE="$OPTARG" ;;
+        H) HWADDR="$OPTARG" ;;
         h) print_help && exit 0 ;;
         :) printf 'Missing argument -%s\n' "$OPTARG" && exit 1 ;;
         \?) printf 'Invalid argument -%s\n' "$OPTARG" && exit 1 ;;
@@ -61,7 +64,7 @@ main() {
         --memory "$MEMORY" \
         --disk pool="$VMPOOL",size="$DISK",boot.order=1 \
         --disk path="$INSTALL_DISK",format=raw,boot.order=2 \
-        --network bridge="$BRIDGE" \
+        --network bridge="$BRIDGE",model=virtio,mac="$HWADDR" \
         --serial pty \
         --graphics none \
         --boot loader=/usr/share/edk2/ovmf/OVMF_CODE.fd,loader.readonly=on,loader.type=pflash &&
