@@ -63,11 +63,17 @@ make_files() {
 host_key_checking = false
 interpreter_python = auto_silent
 deprecation_warnings = false
-inventory_unparsed_warning = false
 localhost_warning = false
 display_ok_hosts = true
 display_skipped_hosts = false
 display_args_to_stdout = false
+log_path = ansible.log
+
+inventory = ./inventory
+roles_path = ./roles
+collections_path = ./collections
+library = ./library
+module_utils = ./module_utils
 
 forks = 10
 remote_user = ansible
@@ -80,13 +86,6 @@ private_key_file = .secrets/ansible_key
 # become_password_file = .secrets/become-pass
 # ask_pass = false
 # connection_password_file = .secrets/connection-pass
-
-inventory = ./inventory, ~/.ansible/inventory, /usr/share/ansible/inventory
-roles_path = ./roles, ~/.ansible/roles, /usr/share/ansible/roles
-collections_path = ./collections, ~/.ansible/collections, /usr/share/ansible/collections
-library = ./library, ~/.ansible/library, /usr/share/ansible/library
-module_utils = ./module_utils, ~/.ansible/module_utils, /usr/share/ansible/module_utils
-log_path = ansible.log
 
 EOF
 
