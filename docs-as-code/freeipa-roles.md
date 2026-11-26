@@ -18,7 +18,6 @@ ipaclient_no_ntp: true
 ipaclient_no_ssh: true
 ipaclient_no_sshd: true
 ipaclient_mkhomedir: true
-ipaclient_dns_servers: []
 ipasssd_enable_dns_updates: true
 ```
 ### IPA Server Vars
@@ -44,6 +43,8 @@ ipaserver_no_reverse: false
 ipaserver_auto_reverse: true
 ipaserver_no_forwarders: true
 ipaserver_auto_forwarders: false
+ipaserver_forward_policy: first # Or only
+ipaserver_forwarders: []
 
 ```
 
@@ -82,4 +83,7 @@ ipaclient_dns_servers: "{{ ipa_dns_servers }}"
 ipaclient_servers: "{{ ipa_servers }}"
 ipaclient_setup_firewalld: true
 ipaclient_force_join: true
+
+ipaclient_configure_dns_resolver: true
+ipaclient_cleanup_dns_resolver: true
 ```
