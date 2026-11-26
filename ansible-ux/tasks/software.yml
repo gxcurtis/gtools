@@ -2,18 +2,13 @@
   include_vars:
     file: "{{ playbook_dir }}/vars/packages.yml"
     
-- name: Software block
-  block:
-    - name: Install dnf packages
-      become: true
-      dnf:
-        name: "{{ dnf_packages }}"
-        state: present
-      when: ansible_facts['os_family'] == 'RedHat'
-  rescue:
-    - name: Rescue message
-      debug:
-        msg: "Couldn't install packages"
+- name: Install dnf packages
+  become: true
+  ignore_errors: true
+  dnf:
+    name: "{{ dnf_packages }}"
+    state: present
+  when: ansible_facts['os_family'] == 'RedHat'
         
 - name: Get package facts
   package_facts:
@@ -21,6 +16,7 @@
   when: ansible_facts['distribution'] != 'MacOSX'
 
 - name: Python3 pip block task
+  ignore_errors: true
   block:
     - name: Pip install packages
       pip:

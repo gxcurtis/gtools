@@ -10,3 +10,4 @@
     - name: Merge Xresources
       command: "xrdb -merge {{ user.home }}/.Xresources"
       when: xresources.changed
+      ignore_errors: true

@@ -29,3 +29,4 @@
     repo: "{{ item.repo_url }}"
     dest: "{{ vim_plugin_dir}}/{{ item.name }}"
   loop: "{{ vim_plugins }}"
+  ignore_errors: true

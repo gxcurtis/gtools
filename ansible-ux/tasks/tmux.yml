@@ -1,0 +1,8 @@
+- name: Configure user tmux.conf
+  ansible.builtin.copy:
+    content: |
+      set-option -g mode-keys vi
+      set-option -g status-keys vi
+    dest: "{{ user.home }}/.tmux.conf"
+    owner: "{{ user.name }}"
+    mode: 0640

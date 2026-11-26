@@ -27,6 +27,11 @@
         file: tasks/bash.yml
       tags: bash
 
+    - name: Import tmux tasks
+      import_tasks:
+        file: tasks/tmux.yml
+      tags: tmux
+
     - name: Import vim tasks
       import_tasks:
         file: tasks/vim.yml
